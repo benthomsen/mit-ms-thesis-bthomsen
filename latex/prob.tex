@@ -6,99 +6,95 @@
 % TODO change "in this paper" to "in this thesis"
 % TODO bring notation in line with MIMO example
 
-%We consider linear single-input, states-accessible plant models of the form 
-%\begin{equation}
-%\dot x_p = A_p x_p + B_p u_p	
-%\end{equation}
-
-A Model Reference Adaptive Control (MRAC)-based adaptive autopilot is capable of addressing anomalies that can be represented as parametric uncertainties, but may perform poorly when an anomaly causes the order of the vehicle dynamics to change \cite{narendra2012stable, lavretsky2013robust}. A human pilot flying manually may detect such an anomaly and adapt to the anomalous dynamics, but the pilot's tracking performance may be noticeably poorer after a change in dynamics and pilot adaptation \cite{hess2015modeling, zaal2016manual}. Our goal in this paper is to combine the actions of an adaptive autopilot with those of a human pilot and apply the resulting shared controller to two such anomalies, one representing a physical actuator fault and the other a cyber attack on the vehicle's sensors. We focus on the lateral-directional dynamics of a fixed-wing aircraft, which are described briefly. For an aircraft trimmed in straight and level flight with equilibrium speed $u_0$ and pitch angle $\theta_0$, and assuming small perturbations about the equilibrium point, the lateral-directional dynamics of the aircraft can be linearized to the form $\dot{x}_{\mathrm{lat}} = A_{\mathrm{lat}} x_{\mathrm{lat}} + B_{\mathrm{lat}} u_{\mathrm{lat}}$ where
-\begin{eqnarray}
-	x_{\mathrm{lat}} &=& \begin{bmatrix}\beta & p_s & \phi_s & r_s \end{bmatrix}^T, \qquad u_{\mathrm{lat}} = \begin{bmatrix}\delta_r & \delta_a \end{bmatrix}^T \nonumber \\
-	A_{\mathrm{lat}} &=& \begin{bmatrix}
-			\frac{Y_\beta}{u_0} & \frac{Y_p}{u_0} & \frac{g_0\cos{\theta_0}}{u_0} & \frac{Y_r}{u_0} - 1 \\
-			L_\beta & L_p & 0 & L_r \\
-			0 & 1 & 0 & 0 \\
-			N_\beta & N_p & 0 & N_r
-		\end{bmatrix}, \qquad B_{\mathrm{lat}} = \begin{bmatrix}
-			\frac{Y_{\delta_r}}{u_0} & \frac{Y_{\delta_a}}{u_0} \\
-			L_{\delta_r} & L_{\delta_a} \\
-			0 & 0 \\
-			N_{\delta_r} & N_{\delta_a} 
-		\end{bmatrix}
-\end{eqnarray}
-\noindent with definitions of the stability and control derivatives in matrices $A_{\mathrm{lat}}$ and $B_{\mathrm{lat}}$ skipped for brevity (see Ref.~\cite{lavretsky2013robust} for more details). The states correspond to sideslip angle, stability axis roll rate, stability axis bank angle, and stability axis yaw rate, respectively, while the control inputs correspond to rudder and aileron deflections.
-
-Approximate second-order linearized rolling mode dynamics are extracted from this fourth-order system, and this system is given by
+We consider single-input single-output (SISO) \textit{n}th-order linear dynamical plant models of the form 
 \begin{equation}
-	\underbrace{\begin{bmatrix}
-			\dot{\phi} \\ \dot{p}
-		\end{bmatrix}}_{\dot{x}_p} = \underbrace{\begin{bmatrix}
-			0 & 1 \\ 0 & L_p
-		\end{bmatrix}}_{A_p} \underbrace{\begin{bmatrix}
-			\phi \\ p
-		\end{bmatrix}}_{x_p} + \underbrace{\begin{bmatrix}
-			0 \\ L_{\delta_a}
-		\end{bmatrix}}_{B_p} \delta_a
-	\label{eqn:2nd_order_lateral}
-\end{equation} \noindent with an open-loop transfer function
-\begin{equation}
-		\frac{\Phi(s)}{\Delta_a(s)} = \frac{L_{\delta_a}}{s^2 - L_p s}
-\end{equation}
-
-In these equations, $\delta_a$ represents aileron input, and $\phi$ and $p$ denote the aircraft bank angle and roll rate in stability axes, with the subscript $(\cdot)_s$ dropped for notational simplicity. It is assumed that the states ($x_p$) are fully available for feedback (directly from sensors for $p$, and via integration of $p$ for $\phi$). $L_p$ is the roll damping derivative and $L_{\delta_a}$ is the rolling moment due to aileron deflection. We consider scenarios in which these parameters may be unknown, but are addressed in normal operation by an MRAC-based adaptive autopilot. The system has been simplified by fixing $\delta_r(t) = 0$ (no rudder input), so that aileron deflection is the only input. In normal operation, we assume the vehicle has sufficiently fast actuators, so that $\delta_a(t) = u(t)$ and equivalently $\Delta_a(s) = U(s)$, where $u(t)$ is the control signal. 
-
-We now introduce two anomalies into the problem where the first, denoted as case (i), consists of a change in the actuator dynamics, represented as a change in the actuator model from a gain to a first-order lag. The second anomaly, denoted as case (ii), is a latency introduced between sensing and actuation, which may be the result of a denial-of-service (DOS) cyber attack. 
-%Two anomalous scenarios are presented (i) where the ailerons become sluggish, represented as a change in the actuator model from a gain to a first-order lag, and (ii) where there is a significant delay between the time the measurements are taken to the time of actuation. Both of these anomalies may occur due to cyber physical failures.
-
-\subsection{Actuator Fault}
-An anomaly is introduced which changes the actuator dynamics from a gain to a first-order lag
-\begin{equation}
-	\frac{\Delta_a(s)}{U(s)} = \begin{cases}
-		\hfil 1 & t < t_{s,p}\\
-		\frac{1}{T_l s + 1} & t \geq t_{s,p}
-	\end{cases} 
-	\label{eqn:actuator_dynamics_symbolic}
+\dot x_p = A_p x_p + B_p u_p	, \qquad y_p = C_p x_p \label{eq:siso_plant}
 \end{equation} 
-\noindent so that the dynamics of the rolling mode change suddenly from second-order (\ref{eqn:2nd_order_lateral}) to third-order (\ref{eqn:plant_3_symbolic}).
+\noindent where $x_p \in \mathbb{R}^{n \times 1}$ is a state vector, and $A_p \in \mathbb{R}^{n \times n}$ and $B_p \in \mathbb{R}^{n \times 1}$ are an uncertain matrix and an uncertain vector of dynamical properties, respectively, and $u_p(t)$ is a scalar input. $C_p \in \mathbb{R}^{1 \times n}$ is a known vector producing the scalar $y_p$, the plant output, which we would like to follow prescribed commands by providing a control action $u(t)$. For this problem, we consider the case where the vector $x_p$, consisting of the output $y_p$ and its first $n-1$ time derivatives, is measured and available for use in feedback control, and the vector $B_p$ is given by $B_p = [0, \cdots \, 0, \, \beta]^T$. We note that plants of this form have a transfer function from plant input to output given in the Laplace frequency domain by
 \begin{equation}
-	\underbrace{\begin{bmatrix}
-		\dot{\phi} \\ \dot{p} \\ \ddot{p}
-	\end{bmatrix}}_{\dot{x}_p'} = \underbrace{\begin{bmatrix}
-		0 & 1 & 0\\ 0 & 0 & 1 \\ 0 & \frac{L_p}{T_l} & L_p - \frac{1}{T_l}
-	\end{bmatrix}}_{A_p'} \underbrace{\begin{bmatrix}
-		\phi \\ p \\ \dot{p}
-	\end{bmatrix}}_{x_p'} + \underbrace{\begin{bmatrix}
-		0 \\ 0 \\ \frac{L_{\delta_a}}{T_l}
-	\end{bmatrix}}_{B_p'} u
+\frac{Y_p(s)}{U_p(s)} = \frac{\beta}{s^n + \alpha_{n-1} s^{n-1} + \cdots + \alpha_0}	
+\end{equation}
+where $\alpha_i$ and $\beta$ are arbitrary coefficients. Design of the control law $u(t)$ is carried out under nominal conditions with the assumption
+\begin{equation}
+	u_p(t) \equiv u(t). \label{eq:siso_plant_input_nom}
+\end{equation} % TODO does this form need \alpha_0 == 0?
+Note that uncertainty in control effectiveness is captured by the uncertain matrix $B_p$. An adaptive autopilot based on model reference adaptive control (MRAC) is capable of addressing anomalies that can be represented as parametric uncertainties, but may perform poorly when an anomaly causes the order of the vehicle dynamics to change \cite{narendra2012stable, lavretsky2013robust}. A human pilot flying manually may detect such an anomaly and adapt to the anomalous dynamics, but the pilot's tracking performance may be noticeably poorer after a change in dynamics and pilot adaptation \cite{hess2015modeling, zaal2016manual}. 
+
+%Our goal in this thesis is to combine the actions of an adaptive autopilot with those of a human pilot and apply the resulting shared controller to two such anomalies, one representing a physical actuator fault and the other a cyber attack on the vehicle's sensors. 
+
+% TODO remove "case (x)" notation everywhere
+We consider the introduction of two severe anomalies in the dynamics of the plant model (\ref{eq:siso_plant}). The first consists of a change in the actuator dynamics, represented as a change in the actuator model from a gain to a first-order lag. The second anomaly is a latency introduced in the feedback of state information to the control algorithms. 
+
+% TODO add a few sentences on how we will attack this problem
+
+\subsection{Actuator Fault} \label{subsec:siso_act_fault}
+An anomaly is introduced which changes the actuator dynamics from a direct input (\ref{eq:siso_plant_input_nom}) to a first-order lag
+\begin{equation}
+	T_L\dot{u}(t) + u(t) = u_p(t) \label{eqn:actuator_dynamics_symbolic}
+\end{equation} 
+\noindent so that the dynamics of plant augmented with actuator dynamics change suddenly from order $n$ to order $n+1$. We can define an augmented plant 
+\begin{equation}
+	\dot{x}_p' = A_p' x_p' + B_p' u	
+\end{equation}
+where $u(t)$ is defined in (\ref{eqn:actuator_dynamics_symbolic}), and $x_p'$ consists of the output $y_p$ and its first $n$ time derivatives. The matrix $A_p'$ and vector $B_p'$ are then given by
+\begin{equation}
+	A_p' = \begin{bmatrix}
+		\begin{matrix}0 \\ \vdots \end{matrix} & \Bigg[ \quad I_n \quad ~ \Bigg] \\ \alpha_0' & \begin{matrix}\cdots & \alpha_{n+1}' \end{matrix}
+	\end{bmatrix}, \quad B_p' = \begin{bmatrix}
+		0 \\ \vdots \\ \beta'
+	\end{bmatrix}
 	\label{eqn:plant_3_symbolic}
 \end{equation}
 
-If the change in the order of the plant is not known to the adaptive controller, it may no longer be possible for it to stabilize the aircraft following such a change. The question then is if shared control with suitable input from the pilot leading to feedback on $\dot{p}$ can result in improved performance.
-%If the angular acceleration is available for measurement, the resulting problem can be viewed as the adaptive control of a third-order plant whose states are all accessible.
+%\begin{equation}
+%	\underbrace{\begin{bmatrix}
+%		\dot{\phi} \\ \dot{p} \\ \ddot{p}
+%	\end{bmatrix}}_{\dot{x}_p'} = \underbrace{\begin{bmatrix}
+%		0 & 1 & 0\\ 0 & 0 & 1 \\ 0 & \frac{L_p}{T_L} & L_p - \frac{1}{T_L}
+%	\end{bmatrix}}_{A_p'} \underbrace{\begin{bmatrix}
+%		\phi \\ p \\ \dot{p}
+%	\end{bmatrix}}_{x_p'} + \underbrace{\begin{bmatrix}
+%		0 \\ 0 \\ \frac{L_{\delta_a}}{T_l}
+%	\end{bmatrix}}_{B_p'} u
+%	\label{eqn:plant_3_symbolic}
+%\end{equation}
+
+If the change in the order of the plant is not known to the adaptive controller, it may no longer be possible for it to stabilize the plant following such a change. The question then is if a shared decision-making architecture, with suitable action from the human pilot leading to feedback on the augmented state vector $x_p'$, can result in the recovery of closed-loop performance with anomalous actuator model (\ref{eqn:actuator_dynamics_symbolic}).
 
 \subsection{Time-Delayed Sensor Measurements}
-We consider a cyber-physical anomaly, such as a DOS-type cyber attack, which leads to latency between sensor measurements and actuation. We model this anomaly as the addition of a time delay $\tau$ of the state measurements before the computation of the control input. We approximate the corresponding transfer function of a pure time delay $\tau$ as a first-order filter
+We consider the introduction an anomaly in the cyber-physical space of the dynamical system with feedback control via adaptive control algorithms, which leads to latency in the feedback of plant state information. We model this anomaly as the addition of a time delay $\tau$ of the state measurements before the computation of the control input, causing a discrepancy between the plant state $x_p$ and the state as sensed by the controller, denoted $x_\sigma$, given by
 \begin{equation}
-	e^{-\tau s} \approx \frac{1}{1 + \tau s}
+	x_\sigma(t) = x_p(t - \tau).
+\end{equation}
+
+We note that the time delay $\tau$ may be approximated up to a certain frequency as a first-order filter, given in the Laplace frequency domain as
+\begin{equation}
+	e^{-\tau s} \approx \frac{1}{1 + \tau s}.
 	\label{first_order_delay_approx}
 \end{equation}
-
-We note that the resulting approximation of delayed plant dynamics is third-order 
+In the time domain, this approximation corresponds to the differential equation
 \begin{equation}
-	\underbrace{\begin{bmatrix}
-		\dot{\phi} \\ \dot{p} \\ \ddot{p}
-	\end{bmatrix}}_{\dot{x}_\sigma'} = \underbrace{\begin{bmatrix}
-		0 & 1 & 0\\ 0 & 0 & 1 \\ 0 & \frac{L_p}{\tau} & L_p - \frac{1}{\tau}
-	\end{bmatrix}}_{A_\sigma'} \underbrace{\begin{bmatrix}
-		\phi \\ p \\ \dot{p}
-	\end{bmatrix}}_{x_\sigma'} + \underbrace{\begin{bmatrix}
-		0 \\ 0 \\ \frac{L_{\delta_a}}{\tau}
-	\end{bmatrix}}_{B_\sigma'} u
-	\label{eqn:plant_3_tau}
+	\tau \dot{x}_{\sigma}(t) + x_{\sigma}(t) \approx x_p(t)	
 \end{equation}
-\noindent where the notation $(\cdot)_\sigma$ denotes the autopilot-sensed (delayed) state. A shared control solution to the anomaly of case (i) can therefore potentially be applied in this case as well.
 
+We note that this effectively increases the order of the plant from $n$ to $n+1$ when we consider the output to be the delayed signal. In this case, the augmented plant is given by
+\begin{equation}
+	\dot{x}_\sigma' = A_p' x_\sigma' + B_p' u \label{eqn:plant_3_tau}
+\end{equation}
+with $A_p'$ and $B_p'$ defined in (\ref{eqn:plant_3_symbolic}). Due to this similarity, we investigate the applicability of a shared control solution to the problem of Section \ref{subsec:siso_act_fault} to the problem of a time-delayed state measurement.
 
+%\begin{equation}
+%	\underbrace{\begin{bmatrix}
+%		\dot{\phi} \\ \dot{p} \\ \ddot{p}
+%	\end{bmatrix}}_{\dot{x}_\sigma'} = \underbrace{\begin{bmatrix}
+%		0 & 1 & 0\\ 0 & 0 & 1 \\ 0 & \frac{L_p}{\tau} & L_p - \frac{1}{\tau}
+%	\end{bmatrix}}_{A_\sigma'} \underbrace{\begin{bmatrix}
+%		\phi \\ p \\ \dot{p}
+%	\end{bmatrix}}_{x_\sigma'} + \underbrace{\begin{bmatrix}
+%		0 \\ 0 \\ \frac{L_{\delta_a}}{\tau}
+%	\end{bmatrix}}_{B_\sigma'} u
+%	\label{eqn:plant_3_tau}
+%\end{equation}
 
 \section{Remote Human Operation and Output Feedback Adaptive Control}
 We consider linear multi-input multi-output (MIMO) plant models of the form
