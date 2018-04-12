@@ -1,0 +1,136 @@
+% -*- Mode:TeX -*-
+
+%% IMPORTANT: The official thesis specifications are available at:
+%%            http://libraries.mit.edu/archives/thesis-specs/
+%%
+%%            Please verify your thesis' formatting and copyright
+%%            assignment before submission.  If you notice any
+%%            discrepancies between these templates and the 
+%%            MIT Libraries' specs, please let us know
+%%            by e-mailing thesis@mit.edu
+
+%% The documentclass options along with the pagestyle can be used to generate
+%% a technical report, a draft copy, or a regular thesis.  You may need to
+%% re-specify the pagestyle after you \include  cover.tex.  For more
+%% information, see the first few lines of mitthesis.cls. 
+
+%\documentclass[12pt,vi,twoside]{mitthesis}
+%%
+%%  If you want your thesis copyright to you instead of MIT, use the
+%%  ``vi'' option, as above.
+%%
+%\documentclass[12pt,twoside,leftblank]{mitthesis}
+%%
+%% If you want blank pages before new chapters to be labelled ``This
+%% Page Intentionally Left Blank'', use the ``leftblank'' option, as
+%% above. 
+
+\documentclass[12pt,twoside]{mitthesis}
+\usepackage{lgrind}
+%% These have been added at the request of the MIT Libraries, because
+%% some PDF conversions mess up the ligatures.  -LB, 1/22/2014
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\pagestyle{plain}
+\usepackage{verbatim}
+\usepackage{array}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,calc}
+%\usepackage{hyperref}
+%\hypersetup{colorlinks=true, allcolors=[rgb]{0.3,0.3,0.8}}
+
+\graphicspath{{../fig/}}
+
+\tikzstyle{block} = [draw, rectangle, rounded corners=0.1cm,
+    minimum height=3em, minimum width=6em, text=black, align=center]
+\tikzstyle{sum} = [draw, circle, fill=white, node distance=1.5cm, minimum size=1cm, text=black]
+\tikzstyle{gain} = [draw, circle, color=olive!100, thick, fill=olive!5, node distance=1.5cm, minimum size=1cm, text=black]
+\tikzstyle{input} = [coordinate]
+\tikzstyle{output} = [coordinate]
+\tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+\tikzstyle{tri_gain} = [draw, isosceles triangle,
+      		  fill=white, shape border rotate=180]
+\tikzstyle{stage} = [draw, rectangle, rounded corners=0.1cm, align=center, minimum height=3em, minimum width=9em, color=gray!80, fill=blue!50!green!20, text = black, node distance=8cm, font=\bf]
+\tikzstyle{row} = [draw, rectangle, rounded corners=0.1cm, align=center, minimum height=3em, minimum width=40em, text=black, color=gray!80, fill=gray!10]
+\tikzstyle{note} = [align=center, minimum height=3.5em, minimum width=36em, text=black]
+\tikzstyle{arr} = [draw, line width=0.8mm, ->, color=gray]
+
+
+\begin{document}
+
+\include{cover}
+% Some departments (e.g. 5) require an additional signature page.  See
+% signature.tex for more information and uncomment the following line if
+% applicable.
+% \include{signature}
+\pagestyle{plain}
+
+\begin{comment}
+Introduction (want to separate background in its own chapter?):
+	- Model reference adaptive control
+		- History
+		- State feedback, output feedback formulations
+		- Limitations
+	- Human operators/pilots
+		- Sensory pathways
+		- Sensory illusions
+		- PIOs/APCs
+		- remote piloting
+	
+	skip these: - HALE VFAs
+	skip these: - Cyber security
+	skip these:		- Kwon type stuff
+	skip these:		- DOS attacks
+	
+	- Shared/supervisory control structures
+	- Related work
+	- Contributions
+
+SISO shared control: state-feedback adaptive controller with CRMs
+	- Problem statement: Shared control for piloted vehicles, state feedback, SISO
+		- actuator dynamics
+		- time delay
+	- Shared control framework
+		- state-feedback MRAC+crm
+		- human pilot action
+	
+MIMO shared control: output-feedback adaptive controller with CRMs
+	- Problem statement: Shared control for UAVs, output feedback, MIMO
+		- actuator dynamics on VFA
+	- Shared control framework
+		- output-feedback (MIMO) MRAC+crm, RD2-RD3
+		- human operator action
+
+Simulation studies:
+	- SISO lateral-directional linear B747: actuator lag with state feedback
+	- SISO lateral-directional linear B747: time delay with state feedback
+	- MIMO longitudinal nonlinear HALE VFA: actuator lag with output feedback
+	
+Conclusions:
+	- summary
+	- future work directions
+	
+Appendix:
+	- links to GitHub repos for SISO, MIMO sims, VFA model
+	- tables of linear models, plant parameters, etc.
+	
+\end{comment}
+
+\include{contents}
+\include{intro}
+\include{prob}
+% TODO work in some motion planning / robotics refs somewhere
+\include{siso_shared_ctrl}
+\include{mimo_shared_ctrl}
+\include{sims}
+\include{summary}
+\appendix
+\include{appa}
+\include{biblio}
+\end{document}
+

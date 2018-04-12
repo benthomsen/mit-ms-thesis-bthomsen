@@ -1,0 +1,73 @@
+\chapter{Introduction} \label{sec:introduction}
+% TODO change section label to chapter label
+% TODO look through in-text citation format and make sure none in IFAC format
+% TODO cite Hess less, cite more autonomy papers
+% TODO make sure to refer to human and not specifically pilot in high level stuff
+
+Model-based feedback control techniques, where control design is carried out based on \textit{a priori} knowledge of system dynamics, have become ubiquitous in industries such as aerospace, due to their ability to specify characteristics of the closed-loop system dynamics, ensure stability, and certify optimality over a range of operating conditions. In any complex dynamical system, however, uncertainty is inevitable. Uncertainties may be present for myriad reasons including modeling errors, environmental variations, unforeseen anomalies, and disturbances. The field of adaptive control addresses a limitation of control based on models of plant dynamics, namely that parameters used to model the plant may be uncertain. Model reference adaptive control (MRAC) \cite{narendra2012stable, lavretsky2013robust} accommodates these parametric uncertainties through online tuning of control parameters to ensure specified closed-loop dynamics are realized. Recent advances in MRAC have included the development of closed-loop reference models (CRMs) \cite{gibson2013adaptive}, which greatly improves transient performance during online learning. Guarantees of stability and tracking convergence are obtained under a few assumptions on the underlying modeling structure. One such assumption includes knowing the order of the system \textit{a priori} for control design. This in turn is used to determine the number of adjustable parameters which in turn represent the key adaptive elements of an adaptive controller.
+
+Human operators of dynamical systems also develop mental models of expected dynamic behavior, often over long periods of active learning. Human pilots, for example, have been modeled and studied extensively to examine their use of information feedback and ability to adapt their control strategies to unfamiliar situations \cite{mcruer1967review, phatak1969model}, and are found to have limits when attempting to rapidly learn unfamiliar and anomalous vehicle dynamics \cite{hess2012modeling, hess2015modeling, endsley1995toward, zaal2016manual, oliver2017cognition}. In stressful situations, human pilots tend to apply high control gains, which coupled with certain dynamical anomalies increases the risk of loss of control \cite{hess1997unified}. A recent study found that the majority of transport aircraft loss of control incidents over a 15-year period involved inaction or improper action by the flight crew \cite{belcastro2014preliminary} . Endsley (1996) points to pilot error following a transition from autonomous to manual control (often as the result of an anomaly) as a common factor in loss of control incidents \cite{endsley1996automation}. Issues with manual control of dynamical systems are exacerbated when the human operator is physically separated from the dynamics of the system, as is the case with remotely piloted vehicles \cite{mccarley2004human, tvaryanas2008recurrent}. The additional complexities involved with remote operation include a lack of sensory and perceptive cues regarding the plant state and its environment, time delays between the dynamical system and operator for both sensing and actuation, and difficulty ascertaining the open-loop dynamical response between control input and plant output \cite{lam2008haptic}. 
+
+This naturally leads one to address the problem of how the limitations of autonomous control systems based on adaptive control algorithms (as in Refs.~\cite{narendra2012stable} and \cite{lavretsky2013robust}) and those of the human operators can be overcome by sharing decision-making and control tasks between adaptive control algorithms and human operators. The goal of this work is to develop one such framework where a supervisory human operator takes a targeted and active role in response to anomalous plant behavior, allowing an adaptive control algorithm to suitably adapt to the introduction of severe unmodeled dynamics and recover closed-loop control performance.  
+
+\section{Background}
+Analysis of manual (human) control \cite{hess2015modeling, zaal2016manual, mcruer1967review, mcruer1980human} has been studied extensively in the flight control literature. The widely used crossover model of the human pilot in manual flight control\cite{mcruer1967review} hypothesizes that the human pilot generates either lead or lag equalization so that the open-loop transfer function of the pilot-vehicle system has the characteristics of a first-order system near the crossover frequency. For a plant (the aircraft) with dynamics $Y_c(s)$, the pilot would aim to provide lead equalization so that together with the pilot's dynamics $Y_p(s)$, an open-loop pilot-vehicle transfer function is generated as $Y_{ol}(s)  = Y_p(s)Y_c(s) = \frac{K}{s} e^{-\tau s}$ \cite{mcruer1980human}. Assuming that the dominant characteristics of the aircraft are approximated by a second-order system and a pilot's action is in the form of a proportional-derivative (PD) controller, such a characteristic near the crossover frequency is reasonable to expect. More recent research has investigated pilot adaptation to time-varying dynamics in Refs.~\cite{hess2015modeling} and \cite{hess2009modeling} and it has been argued that an adaptive PD controller with time-varying gains can be attributed to a pilot's actions. Zaal and Sweet \cite{zaal2011estimation} applied maximum-likelihood estimation (MLE) techniques to identify the time-varying parameters of pilots, whose gains correspond to that of an adaptive PD controller. In  Ref.~\cite{zaal2016manual}, the author used this technique to identify these parameters in a data set in which trained aircraft pilots in a simulation environment controlled multi-axis tasks undergoing a sudden and unexpected change in dynamics. Control performance in these experiments was shown to degrade after a change in vehicle dynamics to something with which the pilots were not familiar, even as the pilots adapted their feedback gains to try and recover their performance.
+
+% TODO shorten above on manual control
+% TODO discuss human supervisory control a bit (based on below)
+To maximize the probability of detection of an anomaly while minimizing the probability of false alarm, it may be advantageous to include the human operator in fault detection and diagnosis \cite{sheridan2000human}. In particular, given that the anomaly response consists broadly of (a) perception of the anomaly, and (b) mitigation of the anomaly effects through suitable correction and compensation, the question is if a human operator can perform step (a) and model reference adaptive control algorithms can be used to perform step (b). Unlike Refs.~\cite{hess2015modeling} and \cite{hess2009modeling} where the pilot performs both steps (a) and (b), we propose a shared control action where a perception task is performed by the pilot, while an adaptive autopilot compensates for the effect of anomaly. This task allocation can be thought of as a specific example of supervisory control, defined by Sheridan \cite{sheridan1976toward, sheridan2011adaptive}. The supervisory control structure of Ref.~ \cite{sheridan2011adaptive}, modified for relevance to the flight control task, is shown in Figure \ref{fig:sheridan_adapted}, where the human supervisor can modify parameters of the control interface, control law, measurements, and display interface through pathways 1-4, respectively. A division of labor similar to the one which we propose has been investigated recently in Ref.~\cite{farjadian2017bumpless}, where the pilot's role is to provide an initial estimate of the anomaly severity, which is then used by an adaptive autopilot to determine a reference model and estimates of control parameters. Unlike Ref.~\cite{farjadian2017bumpless}, here we consider more complex anomalies which are assumed to significantly alter the plant model structure, and we explore how the pilot and autopilot can be used effectively in the anomaly response.
+
+\begin{figure}[t]
+	\centering
+
+\begin{tikzpicture}[auto, node distance=2cm,>=latex'] \footnotesize
+    \node at (0,0) [block, name=human, minimum width=12cm, thick, color=black!60!cyan, fill=cyan!5, text=black, dashed] {\large Human Supervisor (sets/changes parameters)};
+    \node [block, below=of human.west, anchor=west] (ci) {Control\\ Interface};
+    \node [block, below=of human.east, anchor=east] (di) {Display\\ Interface};
+	\draw [dashed,->, very thick, color=black!60!cyan] ($(ci.north) + (0,0.95)$) -- node [pos=0.5] {$1$} (ci.north);
+	\draw [dashed,->, very thick, color=black!60!cyan] ($(di.north) + (-0.5,0.95)$) -- node [pos=0.5] {$4$} ($(di.north) + (-0.5,0)$);
+	\draw [double,->] ($(di.north) + (0.5,0)$) -- node [pos=0.5] {$y_D$} ($(di.north) + (0.5,0.95)$);
+	
+	\node at (-0.3, -4) [block, very thick] (vehicle) {Dynamical\\ System};
+	\node [block, left of=vehicle, anchor=east] (ctrl) {Control\\ Algorithms};
+	\node [block, right of=vehicle, anchor=west] (meas) {Sensors};
+	\draw [double,->] (ctrl) -- node {$u$} (vehicle);
+	\draw [double,->] (vehicle) -- node [pos=0.7] {$x$} (meas);
+	\coordinate [right of=meas, node distance=3cm] (tmp3); 
+
+	\draw [double,->] (meas.east) -- node [pos=0.3]{$y$} (tmp3);
+	\draw [double,->] ($(ctrl.west) + (-1.5,-0.15)$) -- node [pos=0.5]{$y$} ($(ctrl.west) + (0,-0.15)$);
+
+	\draw [double,->] (meas.east) -| (di.south);
+
+	\draw [dashed,->, very thick, color=black!60!cyan] ($(meas.north) + (0,2.95)$) -- node [pos=0.17] {$3$} (meas.north);
+
+	\draw [dashed,->, very thick, color=black!60!cyan] ($(ctrl.north) + (0,2.95)$) -- node [pos=0.17] {$2$} (ctrl.north);
+	
+    \node [block, left of=di, anchor=east, node distance=2.6cm] (xs) {Human-\\Sensed States};
+	\draw [double,->] (xs.north) -- node [pos=0.5]{$y_H$} ($(xs) + (0,1.5)$);
+	\draw [double,->] (vehicle.east) -| (xs.south);
+
+	\draw [double,->] (ci.south) |- node [pos=0.3] {$r$} ($(ctrl.west) + (0,0.15)$);
+
+\end{tikzpicture}
+
+	\caption{General shared decision-making and control architecture adapted from Ref.~\cite{sheridan2011adaptive}}
+	\label{fig:sheridan_adapted}
+\end{figure}
+
+% TODO add 4-5 sentences on remote human operation/ remotely piloted aircraft
+
+Anomalies in aircraft dynamical behavior can come from a number of sources, such as sensor or actuator system failures or malfunctions, changes to the inertial properties of the aircraft, structural damage, and foreign object damage \cite{belcastro2016aircraft}. As aerial vehicles increasingly depend on networked systems for guidance and navigation, there is a need to consider not only physical failures but also cyber attacks. Advanced aircraft navigation systems, which rely on the fusion of various digital sources of information to estimate the vehicle state and to guide and control the vehicle present new vulnerabilities which can have severe consequences in safety and control performance \cite{kim2012cyber, kerns2014unmanned, kwon2014analysis, amin2009safe}. The response to an anomaly in semi-autonomous flight is generally to transfer control to the human pilot unless the aircraft is equipped with active fault-tolerant control systems (AFTCS) that have been designed to handle the particular type of anomaly \cite{zhang2008bibliographical}. The latter requires fault detection and diagnosis (FDD) schemes which are able to correctly and consistently detect, isolate, and diagnose anomalous and unfamiliar behavior. State of the art AFTCS which use model-based FDD are only able to retain autonomous control after anomalies which are well-defined and likely to be properly diagnosed, and for which a reconfigurable controller has been extensively verified and validated \cite{zhang2008bibliographical}. Such AFTCS, in principle, include adaptive control methods as well.
+
+\section{Contributions}
+% TODO make sure this mentions both SISO/SF/HP, MIMO/OF/RHO
+% TODO add "In chapter X we ..., in chapter Y we ..."
+% TODO make sure no citations here
+% TODO use of "we" throughout - OK in thesis?
+% TODO change all "sec:" labels to "ch:" labels
+
+In this thesis, we propose a shared decision-making and control architecture between humans and adaptive control algorithms. We consider this architecture in the context of flight control, where the desire for safety often leads to system architectures with redundancy between supervisory human operators and autonomous flight systems. We base this shared control architecture around the use of adaptive control algorithms to manage uncertainty in dynamics, and supervisory human operators who manage a shared response to anomalous changes in the structure of plant dynamics. This thesis will demonstrate and discuss how this shared decision-making and control architecture can enable overall adaptation capabilities beyond what either a human or adaptive control algorithm alone would be able to accomplish.
+
+Chapter \ref{sec:problem} states the problem of control of a plant in the presence of parametric uncertainties as well as sudden dynamical anomalies, which are defined in more detail. Chapter \ref{ch:siso_shared_ctrl} presents the shared decision-making and control architecture in a simplified example, using control algorithms with a scalar input and access to the full plant state, and an onboard human pilot. Chapter \ref{ch:mimo_shared_ctrl} extends this shared decision-making and control architecture to a multi-input multi-output plant model with control design based on output feedback and remote human operators. In Chapter \ref{sec:numerical}, it is shown that the resulting shared controller performs satisfactorily through extensive numerical simulation studies. Concluding remarks are given in Chapter \ref{sec:conclusion}.
+

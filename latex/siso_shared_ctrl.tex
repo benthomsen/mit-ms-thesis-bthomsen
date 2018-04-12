@@ -1,0 +1,271 @@
+\chapter{Shared Control with Human Pilot and State Feedback} \label{ch:siso_shared_ctrl}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Proposed Shared Controller} \label{sec:shared}
+\subsection{Role of the Human Pilot}
+Trained human pilots develop mental models of the vehicle response and expected performance in different situations, giving these pilots a high level of situation awareness regarding the aircraft \cite{endsley1995toward}. Even when a human pilot is not controlling the vehicle, anomalous vehicle behavior would be manifested through changes in the closed-loop response of the vehicle and its disturbance-rejection abilities. When the cockpit controls used in manual control are physically actuated during autopilot operation, the pilot may be able perceive the autopilot's control actions through kinesthetic or tactile feedback \cite{tan1994human, yang2007development}. In combination with the pilot's visual and vestibular sensing of vehicle dynamics, this sensing of autopilot control actions will allow the human pilot to determine the open-loop vehicle response and perceive anomalous behavior. We therefore hypothesize that an on-board human pilot has the sensory and perceptive capabilities to detect and diagnose anomalies such as those described above. 
+
+Our assumptions are that the human pilot can sense (i) $y_{pilot} \subseteq y$, (ii) $r$, (iii) $u$, (iv) $\delta_a$, and (v) $x_{pilot} \subseteq x_p$, where $y_{pilot}$ is a subset of vehicle sensor measurements available to the pilot, and $x_{pilot}$ is a subset of vehicle states which the pilot is able to sense independent of the vehicle's sensors. The hypothesis is that (i)-(iii) are accessible through cockpit displays, (iv) is accessible through cockpit control interfaces, and (v) is accessible through the pilot's visual and vestibular sensing. In addition to changes in closed-loop behavior in both anomalies introduced in Section \ref{sec:problem}, the physical actuator fault would change the relationship between $u$ and $\delta_a$, while the time-delayed sensor measurements would change the relationship between $x_{pilot}$ and $y_{pilot}$. We hypothesize that incorporating the human pilot in detection and decision-making tasks may allow the autopilot to retain autonomous control in situations where reliance on autonomous anomaly detection and diagnosis is impractical. 
+
+% The adaptive autopilot may be used simultaneously in detection, by alerting the pilot to potential anomalies and proposing diagnostic actions, such as a prescribed sequence of control inputs to probe the vehicle response. 
+
+\subsection{MRAC-Based Adaptive Autopilot}
+Central to this work is the use of an autopilot which employs advanced control principles for low-level flight control tasks in the place of human pilots. In particular, our autopilot design uses MRAC, with vehicle states available for feedback \cite{narendra2012stable}. Closed-loop reference models (CRMs) based on Ref.~\cite{gibson2013adaptive} are utilized here to improve the transient performance of MRAC, in comparison to open-loop reference models.
+
+The plant to be controlled is an \textit{n}th-order linear dynamical system given by
+\begin{equation}
+	\dot{x}_p(t) = A_p x_p(t) + B_p u(t)
+	\label{eqn:plant}
+\end{equation}
+\noindent where $A_p \in \mathbb{R}^{n \times n}$ and $B_p \in \mathbb{R}^{n \times 1}$ are an unknown matrix and vector, respectively, and $u(t)$ is a scalar input. The feedforward/feedback control law has the form
+\begin{equation}
+	u(t) = \theta(t) x_p(t) + q(t) r(t)
+	\label{eqn:control_law}
+\end{equation}
+\noindent where $\theta(t) \in \mathbb{R}^{1 \times n}$ and scalar $q(t)$ are adaptive gains on the plant states and reference input, $r(t)$, respectively.
+
+The reference model used in this adaptive controller is a dynamical system 
+\begin{equation}
+	\dot{x}_m(t) = A_m x_m(t) + B_m r(t) - L_m \left[x_p(t) - x_m(t)\right]
+	\label{eqn:crm}
+\end{equation}
+\noindent where $A_m \in \mathbb{R}^{n \times n}$ is Hurwitz, $B_m \in \mathbb{R}^{n \times 1}$, $L_m \in \mathbb{R}^{n \times n}$, and $e(t) \equiv x_p(t) - x_m(t)$ defined as the state error. It is assumed that there exists scalar $\lambda$ such that $B_p \equiv \lambda B_m$. In this form, an appropriate choice of $L_m$, such as (\ref{eqn:L_m}), ensures that there exists matrix $P = P^T > 0$, the solution to the Lyapunov equation $(A_m + L_m)^T P + P(A_m + L_m) = - Q$, for arbitrary $Q = Q^T > 0$. Feedback and feedforward control gain adaptation is given by
+\begin{eqnarray}
+	\dot{\theta}(t) &=& - \Gamma_\theta B_m^T P e(t) x_p^T(t) \label{eqn:adaptive_law_theta}\\
+	\dot{q}(t) &=& - \gamma_q B_m^T P e(t) r(t)
+	\label{eqn:adaptive_law_gamma}
+\end{eqnarray}
+\noindent where $\Gamma_\theta > 0$ and $\gamma_q > 0$ are a diagonal matrix and scalar, respectively, of constant weights. These weights correspond to learning rates on the feedback/feedforward parameters. The state error feedback gain, $L_m$, can be chosen to be
+\begin{equation}
+	L_m = - A_m - \Gamma_\theta
+	\label{eqn:L_m}
+\end{equation}
+\noindent which ensures stability of the closed-loop reference model dynamics. With the plant, control law, and reference model dynamics defined in (\ref{eqn:plant}), (\ref{eqn:control_law}), and (\ref{eqn:crm}), respectively, the equations defining the feedback and feedforward gains $\theta^*$ and $q^*$ which match the dynamics of the closed-loop system to that of the reference model exactly are 
+\begin{eqnarray}
+	A_p + B_p \theta^* &=& A_m \label{eqn:matchcond1} \\
+	B_p q^* &=& B_m \label{eqn:matchcond2} 
+\end{eqnarray}
+
+% change notation to match text
+\begin{figure}[t]
+	\centering
+	
+%	\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+%    \node [input, name=input] {};
+%    \coordinate [name=input_inter, right of=input, node distance=1.5cm];
+%    \node [gain, right of=input_inter, node distance=1.3cm] (ff) {\LARGE $q$};
+%    \coordinate [below left of=ff, node distance=0.75cm] (ff_bl);
+%    \coordinate [above right of=ff, node distance=0.75cm] (ff_ar);
+%    \draw [->,thin] (ff_bl) -- (ff_ar);
+%    
+%    \node [align=center, below of = ff, node distance=1cm] {\small Adaptive\\\small Feedforward Gain};
+%    \node [sum, right of=ff, node distance=1.7cm] (sum) {\LARGE $\Sigma$};
+%%    \node [block, right of=sum] (controller) {Controller};
+%    \node [block, right of=sum, fill=gray!10, 
+%            node distance=2.5cm] (system) {Plant};
+%%    \node [block, right of=rm, node distance=4cm] (adaptive){Adaptive Law};
+%	\node [gain, below of=system] (fb) {\LARGE $\theta$};
+%    \coordinate [below left of=fb, node distance=0.75cm] (fb_bl);
+%    \coordinate [above right of=fb, node distance=0.75cm] (fb_ar);
+%    \draw [->, thin] (fb_bl) -- (fb_ar);
+%
+%    \node [align=center, below of = fb, node distance=1cm] {\small Adaptive\\\small Feedback Gain};
+%
+%    \draw [->] (sum) -- node[name=u] {$u(t)$} (system);
+%    \coordinate [name=output_inter, right of=system, node distance=2.5cm];
+%    \node [output, right of=output_inter] (output) {};
+%%    \coordinate [below of=u] (tmp);
+%
+%    \draw [draw,->] (input) -- node [pos=0.25] {$r(t)$} (ff);
+%    \draw [draw,->] (ff) -- node [pos=0.8] {$+$} (sum);
+%%    \draw [->] (sum) -- node {$e(t)$} (controller);
+%%    \draw [double,->] (system) -- node [near end] {$x_p(t)$} (output);
+%%    \draw [->] (y) |- (tmp) -| node[pos=0.99] {$+$} 
+%%        node [near end] {$y_m(t)$} (sum);
+%    \draw [double,->] (output_inter) |- (fb);
+%    \draw [double,->] (fb) -| node[pos=0.93] {$+$} (sum);
+%    	
+%    \node [sum, above of=output_inter] (sum_e) {\LARGE $\Sigma$};
+%    \draw [double,->] (system) -|  node [pos=0.95] {$+$} (sum_e);
+%    \draw [double,->] (output_inter) --  node [pos=0.6] {$x_p(t)$} (output);
+%%    \coordinate [name=err_mid, left of = sum_e, node distance=1cm];
+%    \coordinate [name=err_end, right of = sum_e];
+%	\draw [double,->] (sum_e) -- node [pos=0.5] {$e(t)$} (err_end);
+%		
+%    \node [block, above of=u, node distance = 2.5cm, fill=gray!10] (rm){Reference Model};
+%    \draw [->] (input_inter) |- (rm);
+%    \draw [double,->] (rm) -| node [pos=0.2] {$x_m(t)$} node [pos=0.94] {$-$} (sum_e);
+%
+%	\node [tri_gain, left of=sum_e] (lm) {$L_m$};
+%%	\coordinate [left of=rm, node distance=2cm] (err_fb);
+%	\draw [double,->] (sum_e) -- (lm) -| (rm);
+%
+%	\end{tikzpicture}
+
+\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+    \node [input, name=input] {};
+    \coordinate [name=input_inter, right of=input, node distance=1.5cm];
+    \node [gain, right of=input_inter, node distance=1.3cm] (ff) {\LARGE $q$};
+    \coordinate [below left of=ff, node distance=0.7cm] (ff_bl);
+    \coordinate [above right of=ff, node distance=0.7cm] (ff_ar);
+    \draw [->] (ff_bl) -- (ff_ar);
+    
+    \node [align=center, below of = ff, node distance=1cm] {\small Adaptive\\\small Feedforward Gain};
+    \node [sum, right of=ff, node distance=1.7cm] (sum) {\LARGE $\Sigma$};
+%    \node [block, right of=sum] (controller) {Controller};
+    \node [block, right of=sum, 
+            node distance=3.5cm, fill=blue!50!green!20] (system) {Dynamical System};
+%    \node [block, right of=rm, node distance=4cm] (adaptive){Adaptive Law};
+	\node [gain, below of=system] (fb) {\LARGE $\theta$};
+    \coordinate [below left of=fb, node distance=0.7cm] (fb_bl);
+    \coordinate [above right of=fb, node distance=0.7cm] (fb_ar);
+    \draw [->] (fb_bl) -- (fb_ar);
+
+    \node [align=center, below of = fb, node distance=1cm] {\small Adaptive\\\small Feedback Gain};
+
+    \draw [->] (sum) -- node[name=u] {$u(t)$} (system);
+    \coordinate [name=output_inter, right of=system, node distance=2.5cm];
+    \node [output, right of=output_inter] (output) {};
+%    \coordinate [below of=u] (tmp);
+
+    \draw [draw,->] (input) -- node [pos=0.25] {$r(t)$} (ff);
+    \draw [draw,->] (ff) -- node [pos=0.8] {$+$} (sum);
+%    \draw [->] (sum) -- node {$e(t)$} (controller);
+%    \draw [double,->] (system) -- node [near end] {$x_p(t)$} (output);
+%    \draw [->] (y) |- (tmp) -| node[pos=0.99] {$+$} 
+%        node [near end] {$y_m(t)$} (sum);
+    \draw [double,->] (output_inter) |- (fb);
+    \draw [draw,->] (fb) -| node[pos=0.93] {$+$} (sum);
+    	
+    \node [sum, above of=output_inter] (sum_e) {\LARGE $\Sigma$};
+    \draw [double,->] (system) -|  node [pos=0.95] {$+$} (sum_e);
+    \draw [double,->] (output_inter) --  node [pos=0.6] {$x_p(t)$} (output);
+%    \coordinate [name=err_mid, left of = sum_e, node distance=1cm];
+    \coordinate [name=err_end, right of = sum_e];
+	\draw [double,->] (sum_e) -- node [pos=0.5] {$e(t)$} (err_end);
+		
+    \node [block, above of=u, node distance = 2.5cm] (rm){Reference Model};
+    \draw [->] (input_inter) |- (rm);
+    \draw [double,->] (rm) -| node [pos=0.2] {$x_m(t)$} node [pos=0.94] {$-$} (sum_e);
+
+	\node [tri_gain, left of=sum_e] (lm) {$L_m$};
+%	\coordinate [left of=rm, node distance=2cm] (err_fb);
+	\draw [double,->] (sum_e) -- (lm) -| (rm);
+
+\end{tikzpicture}
+
+	\caption{Block diagram of model-reference adaptive controller with closed-loop reference model}
+	\label{fig:mrac_block}
+\end{figure}
+
+To ensure robustness of the adaptive controller, a projection operator\cite{pomet1992adaptive, lavretsky2011projection} is used in conjunction with the adaptive laws (\ref{eqn:adaptive_law_theta}) and (\ref{eqn:adaptive_law_gamma}). The projection operator limits the magnitude of $\dot{\theta}(t)$ and $\dot{q}(t)$, so that the parameters $\theta(t)$ and $q(t)$ remain within a convex set. The reader is referred to Ref.~\cite{gibson2013adaptive} for a detailed treatment of the projection operator as it applies to the general CRM-adaptive controller, but to summarize, the adaptive laws are modified from (\ref{eqn:adaptive_law_theta}) and (\ref{eqn:adaptive_law_gamma}) to be
+\begin{eqnarray}
+	\dot{\theta}(t) &=& \text{Proj}(- \Gamma_\theta B_m^T P e(t) x_p^T(t),\text{ } \theta(t)) \label{eqn:thetadot_projection} \\
+	\dot{q}(t) &=& \text{Proj}(- \gamma_q B_m^T P e(t) r(t),\text{ } q(t)) \label{eqn:qdot_projection}
+\end{eqnarray}
+\noindent with the vector projection operator defined as
+\begin{equation}
+	\text{Proj}(Y, \Phi) = \left[ \text{Proj}(y_1, \varphi_1) \ldots \text{Proj}(y_n, \varphi_n) \right]
+\end{equation}
+\noindent and the scalar projection operator defined as
+\begin{equation} %note: need element-wise version
+	\text{Proj}(y, \varphi) = \begin{cases}
+		y(1 - f(\varphi)) & f(\varphi) > 0 \land y \nabla f(\varphi) > 0\\
+		\hfil y & \text{otherwise}
+	\end{cases}
+\end{equation}
+
+\noindent The function $f(\varphi)$ is taken to be
+\begin{equation}
+	f(\varphi) = \frac{\varphi^2 - \varphi_{m}^2}{2 \varphi_{\epsilon} \varphi_{m} + \varphi_{\epsilon}^2}
+	\label{eqn:proj_function}
+\end{equation}
+\noindent where $\varphi_{m}$ and $(\varphi_{m} + \varphi_{\epsilon})$ define ``soft'' and ``hard'' bounds on the parameter $\varphi$, respectively.
+
+Under nominal vehicle operation with the plant given by (\ref{eqn:2nd_order_lateral}), a second-order reference model corresponding to (\ref{eqn:crm}) is used
+\begin{equation}
+	\underbrace{\begin{bmatrix}
+		\dot{\phi}_d \\ \dot{p}_d
+	\end{bmatrix}}_{\dot{x}_m} = \underbrace{\begin{bmatrix}
+		0 & 1\\ -a_{m,1} & -a_{m,2}
+	\end{bmatrix}}_{A_m} \underbrace{\begin{bmatrix}
+		\phi_d \\ p_d
+	\end{bmatrix}}_{x_m} + \underbrace{\begin{bmatrix}
+		0 \\ b_{m,2}
+	\end{bmatrix}}_{B_m} r(t) - L_m e(t)
+	\label{eqn:rm_2_symbolic}
+\end{equation}
+\noindent where $x_m(t)$ is a vector of the desired states and $r(t)$ is the commanded bank angle. It is straightforward to see that a choice of
+\begin{eqnarray}
+	\theta^* &=& \left[ \frac{-a_{m,1}}{L_{\delta_a}} \quad \frac{-a_{m,2}-L_p}{L_{\delta_a}} \right] \label{e:tstar}\\
+	q^* &=& \frac{b_{m,2}}{L_{\delta_a}} \label{e:qstar}
+\end{eqnarray} 
+\noindent solves the matching condition in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}). This in turn implies that even if the roll damping derivative ($L_p$) and the rolling moment due to aileron deflection ($L_{\delta_a}$) are unknown, the adaptive controller in (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), and (\ref{eqn:qdot_projection}) will be able to vary the feedback and feedforward gains such that the closed-loop response of the system is satisfactory. We shall denote such a case as nominal operation, and consider the anomalous cases as those where in addition to parametric uncertainties, changes in dynamics as denoted in cases (i) and (ii) above occur.
+
+\subsection{The Overall Shared Controller}
+\begin{figure}[h]
+	\centering
+	
+\begin{tikzpicture}[auto, node distance=1.5cm,>=latex'] \scriptsize
+    \node (hp) at (0,0) {\Large Human Pilot};
+    \node (p1) at (3.1,0) {\Large $+$};
+    \node (ap) at (6.2,0) {\Large Autopilot};
+    
+    \node [row, below of = p1] (r1) {\Large $+$};
+    \node [row, below of = r1] (r2) {\Large $+$};
+    \node [row, below of = r2] (r3) {\Large $+$};
+    \node [row, below of = r3] (r4) {\Large $+$};
+    \node [row, below of = r4] (r5) {\Large $+$};
+    \node [row, below of = r5] (r6) {\Large $+$};
+    
+    \node [stage, left of = r1] (s1) {\scriptsize Nominal\\\scriptsize Operation};
+    \node [stage, left of = r2] (s2) {\scriptsize Information\\\scriptsize Acquisition};
+    \node [stage, left of = r3] (s3) {\scriptsize Information\\\scriptsize Analysis};
+    \node [stage, left of = r4] (s4) {\scriptsize Decision\\\scriptsize Selection};
+    \node [stage, left of = r5] (s5) {\scriptsize Action\\\scriptsize Implementation};
+    \node [stage, left of = r6] (s6) {\scriptsize Result};
+    
+    \draw [arr] ($(s1)+(0,1)$) -- (s1);
+    \draw [arr] (s1) -- (s2);
+    \draw [arr] (s2) -- (s3);
+    \draw [arr] (s3) -- (s4);
+    \draw [arr] (s4) -- (s5);
+    \draw [arr] (s5) -- (s6);
+    \draw [arr] (s6) -- ($(s6)+(0,-1)$);
+        
+	\node [note, below of = hp] (hp1) {\scriptsize Monitors for changes in\\\scriptsize autopilot performance};
+	\node [note, below of = hp1] (hp2) {\scriptsize Vestibular, proprioceptive, visual\\\scriptsize sensing, communication with ATC};
+	\node [note, below of = hp2] (hp3) {\scriptsize Internal models of vehicle\\\scriptsize dynamics, pattern recognition};
+	\node [note, below of = hp3] (hp4) {\scriptsize Instructs switch in controller\\\scriptsize structure};
+	\node [note, below of = hp4] (hp5) {};
+	\node [note, below of = hp5] (hp6) {\scriptsize Monitors to ensure performance \\\scriptsize improves and anomaly does not worsen};
+	
+	\node [note, below of = ap] (ap1) {\scriptsize Adaptive autopilot in control};
+	\node [note, below of = ap1] (ap2) {\scriptsize Vehicle sensors};
+	\node [note, below of = ap2] (ap3) {\scriptsize Vehicle fault detection systems\\\scriptsize such as innovations testing};
+	\node [note, below of = ap3] (ap4) {\scriptsize Provides list of potential\\\scriptsize corrective actions};	
+	\node [note, below of = ap4] (ap5) {\scriptsize Switches controller structure\\\scriptsize and retains autonomous control};
+	\node [note, below of = ap5] (ap6) {\scriptsize Adaptive autopilot in control};
+\end{tikzpicture}
+
+	\caption{Our proposal for shared decision making following an anomaly, with stages of decision making categorized in Ref.~\cite{parasuraman2000model}}
+	\label{fig:response_flow}
+\end{figure}
+The shared control algorithm between the adaptive autopilot and human pilot that we propose is as follows. At time $t=0$, the adaptive controller as in (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), and (\ref{eqn:qdot_projection}) is proposed, where the state $x_p$ is given as in (\ref{eqn:2nd_order_lateral}). An anomaly either as in case (i) or case (ii) is assumed to occur at $t=t_{s,p}$. 
+
+Following this time instant, the pilot detects the anomalous vehicle dynamics, and at $t=t_{s,c}$ indicates to the adaptive autopilot the perceived increase in order. Using this pilot input, we propose an adaptive controller predicated on a third-order dynamics of the open-loop plant and assume that in addition to the bank angle and roll rate, angular acceleration $\dot{p}$ is also measurable. We choose a reference model as
+\begin{equation}
+	\underbrace{\begin{bmatrix}
+		\dot{\phi}_d \\ \dot{p}_d \\ \ddot{p}_d
+	\end{bmatrix}}_{\dot{x}_m'} = \underbrace{\begin{bmatrix}
+		0 & 1 & 0\\ 0 & 0 & 1 \\ -a_{m,1}' & -a_{m,2}' & -a_{m,3}'
+	\end{bmatrix}}_{A_m'} \underbrace{\begin{bmatrix}
+		\phi_d \\ p_d \\ \dot{p}_d
+	\end{bmatrix}}_{x_m'} + \underbrace{\begin{bmatrix}
+		0 \\ 0 \\ b_{m,3}'
+	\end{bmatrix}}_{B_m'} r - L_m' e'
+	\label{eqn:rm_3_symbolic}
+\end{equation}
+
+The time interval $[t_{s,p}, \quad t_{s,c}]$ is indicated as Post-Anomaly and the interval $t \geq t_{s,c}$ is indicated as Post-Correction. For case (i), $\theta^* \in \mathbb{R}^3$ and $q^*$ exist that solve the corresponding matching conditions in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}), and an adaptive controller as in (\ref{eqn:thetadot_projection}) and (\ref{eqn:qdot_projection}) can be realized to lead to a stable closed-loop solutions and accurate tracking. These matching conditions are not met, however, in case (ii). In the numerical examples, we will discuss the details of how such an adaptive controller with an increase in dimension following the pilot input performs for both cases of anomalies. 
+A detailed discussion of the stability of the resulting adaptive controller is not carried out in this thesis. But it is clear that if the Post-Anomaly phase is sufficiently short, the adaptive controller will guarantee boundedness of the closed-loop system and convergence of $e(t)$ to zero if our assumptions that the cause of the two anomalies results in a third-order plant and that its states are measurable are satisfied. We carry out a detailed simulation study in the following section and evaluate the performance of the shared controller proposed above.
+
