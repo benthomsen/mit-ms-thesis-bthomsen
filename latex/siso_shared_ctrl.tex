@@ -2,7 +2,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % TODO rethink where to put all this lat-dir specific stuff
-\section{The Proposed Shared Controller} \label{sec:shared}
+% TODO make sure notation here is consistent with earlier
+
+\section{Aircraft Rolling Mode Dynamics}
 As the specifics of our shared decision-making and control architecture are highly application dependent, in this chapter we will focus on the lateral-directional dynamics of a fixed-wing aircraft, which are described briefly. Chapter \ref{ch:mimo_shared_ctrl} will present the architecture in a more general form. For an aircraft trimmed in straight and level flight with equilibrium speed $u_0$ and pitch angle $\theta_0$, and assuming small perturbations about the equilibrium point, the lateral-directional dynamics of the aircraft can be linearized to the form $\dot{x}_{\mathrm{lat}} = A_{\mathrm{lat}} x_{\mathrm{lat}} + B_{\mathrm{lat}} u_{\mathrm{lat}}$ where
 \begin{eqnarray}
 	x_{\mathrm{lat}} &=& \begin{bmatrix}\beta & p_s & \phi_s & r_s \end{bmatrix}^T, \qquad u_{\mathrm{lat}} = \begin{bmatrix}\delta_r & \delta_a \end{bmatrix}^T \nonumber \\
@@ -39,16 +41,12 @@ Approximate second-order linearized rolling mode dynamics are extracted from thi
 
 In these equations, $\delta_a$ represents aileron input, and $\phi$ and $p$ denote the aircraft bank angle and roll rate in stability axes, with the subscript $(\cdot)_s$ dropped for notational simplicity. It is assumed that the states ($x_p$) are fully available for feedback (directly from sensors for $p$, and via integration of $p$ for $\phi$). $L_p$ is the roll damping derivative and $L_{\delta_a}$ is the rolling moment due to aileron deflection. We consider scenarios in which these parameters may be unknown, but are addressed in normal operation by an MRAC-based adaptive autopilot. The system has been simplified by fixing $\delta_r(t) = 0$ (no rudder input), so that aileron deflection is the only input. In normal operation, we assume the vehicle has sufficiently fast actuators, so that $\delta_a(t) = u(t)$ and equivalently $\Delta_a(s) = U(s)$, where $u(t)$ is the control signal. 
 
+% TODO get rid of "case (x)" notation
+
 % TODO organize in same order as OFAC section: MRAC then human
-\subsection{Role of the Human Pilot}
-Trained human pilots develop mental models of the vehicle response and expected performance in different situations, giving these pilots a high level of situation awareness regarding the aircraft \cite{endsley1995toward}. Even when a human pilot is not controlling the vehicle, anomalous vehicle behavior would be manifested through changes in the closed-loop response of the vehicle and its disturbance-rejection abilities. When the cockpit controls used in manual control are physically actuated during autopilot operation, the pilot may be able perceive the autopilot's control actions through kinesthetic or tactile feedback \cite{tan1994human, yang2007development}. In combination with the pilot's visual and vestibular sensing of vehicle dynamics, this sensing of autopilot control actions will allow the human pilot to determine the open-loop vehicle response and perceive anomalous behavior. We therefore hypothesize that an on-board human pilot has the sensory and perceptive capabilities to detect and diagnose anomalies such as those described above. 
 
-Our assumptions are that the human pilot can sense (i) $y_{D} \subseteq y$, (ii) $r$, (iii) $u$, (iv) $\delta_a$, and (v) $y_{H}$, where $y_{D}$ is a subset of vehicle sensor measurements available to the pilot, and $y_{H}$ is the human pilot's sensing independent of the vehicle's sensors. The hypothesis is that (i)-(iii) are accessible through cockpit displays, (iv) is accessible through cockpit control interfaces, and (v) is accessible through the pilot's visual and vestibular sensing. In addition to changes in closed-loop behavior in both anomalies introduced in Section \ref{sec:problem}, the physical actuator fault would change the relationship between $u$ and $\delta_a$, while the time-delayed sensor measurements would change the relationship between $y_{H}$ and $y_{D}$, in addition to the closed-loop vehicle dynamics. We hypothesize that incorporating the human pilot in detection and decision-making tasks may allow the autopilot to retain autonomous control in situations where reliance on autonomous anomaly detection and diagnosis is impractical. 
-
-% The adaptive autopilot may be used simultaneously in detection, by alerting the pilot to potential anomalies and proposing diagnostic actions, such as a prescribed sequence of control inputs to probe the vehicle response. 
-
-\subsection{MRAC-Based Adaptive Autopilot}
-Central to this work is the use of an autopilot which employs advanced control principles for low-level flight control tasks in the place of human pilots. In particular, our autopilot design uses MRAC, with vehicle states available for feedback \cite{narendra2012stable}. Closed-loop reference models (CRMs) based on Ref.~\cite{gibson2013adaptive} are utilized here to improve the transient performance of MRAC, in comparison to open-loop reference models.
+\section{Adaptive Autopilot} \label{sec:siso_sc_adaptive}
+Central to this work is the use of an autopilot which employs advanced control principles for low-level flight control tasks in the place of human pilots. In particular, our autopilot design uses adaptive control with vehicle states available for feedback \cite{narendra2012stable}. Closed-loop reference models (CRMs) based on Ref.~\cite{gibson2013adaptive} are utilized here to improve the transient performance of adaptive control, in comparison to open-loop reference models.
 
 The plant to be controlled is an \textit{n}th-order linear dynamical system given in (\ref{eq:siso_plant}). We design a feedforward/feedback control law of the form
 \begin{equation}
@@ -73,7 +71,7 @@ The reference model used in this adaptive controller is a dynamical system
 	L_m = - A_m - \Gamma_\theta
 	\label{eqn:L_m}
 \end{equation}
-\noindent which ensures stability of the closed-loop reference model dynamics. With the plant, control law, and reference model dynamics defined in (\ref{eqn:plant}), (\ref{eqn:control_law}), and (\ref{eqn:crm}), respectively, the equations defining the feedback and feedforward gains $\theta^*$ and $q^*$ which match the dynamics of the closed-loop system to that of the reference model exactly are 
+\noindent which ensures stability of the closed-loop reference model dynamics. With the plant, control law, and reference model dynamics defined in (\ref{eqn:2nd_order_lateral}), (\ref{eqn:control_law}), and (\ref{eqn:crm}), respectively, the equations defining the feedback and feedforward gains $\theta^*$ and $q^*$ which match the dynamics of the closed-loop system to that of the reference model exactly are 
 \begin{eqnarray}
 	A_p + B_p \theta^* &=& A_m \label{eqn:matchcond1} \\
 	B_p q^* &=& B_m \label{eqn:matchcond2} 
@@ -233,9 +231,21 @@ Under nominal vehicle operation with the plant given by (\ref{eqn:2nd_order_late
 	\theta^* &=& \left[ \frac{-a_{m,1}}{L_{\delta_a}} \quad \frac{-a_{m,2}-L_p}{L_{\delta_a}} \right] \label{e:tstar}\\
 	q^* &=& \frac{b_{m,2}}{L_{\delta_a}} \label{e:qstar}
 \end{eqnarray} 
-\noindent solves the matching condition in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}). This in turn implies that even if the roll damping derivative ($L_p$) and the rolling moment due to aileron deflection ($L_{\delta_a}$) are unknown, the adaptive controller in (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), and (\ref{eqn:qdot_projection}) will be able to vary the feedback and feedforward gains such that the closed-loop response of the system is satisfactory. We shall denote such a case as nominal operation, and consider the anomalous cases as those where in addition to parametric uncertainties, changes in dynamics as denoted in cases (i) and (ii) above occur.
+\noindent solves the matching condition in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}). This in turn implies that even if the roll damping derivative ($L_p$) and the rolling moment due to aileron deflection ($L_{\delta_a}$) are unknown, the adaptive controller in (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), and (\ref{eqn:qdot_projection}) will be able to vary the feedback and feedforward gains such that the closed-loop response of the system is satisfactory. We shall denote such a case as nominal operation, and consider the anomalous cases as those where in addition to parametric uncertainties, changes in dynamics as described in Sections \ref{subsec:siso_act_fault} and \ref{subsec:siso_delay} occur.
 
-\subsection{The Overall Shared Controller}
+% TODO BOOKMARK (check problems with new organization of mrac then human)
+
+\section{Human Pilot} \label{sec:siso_sc_human}
+% TODO make this similar to role of remote human operator
+Trained human pilots develop mental models of the vehicle response and expected performance in different situations, giving these pilots a high level of situation awareness regarding the aircraft \cite{endsley1995toward}. Even when a human pilot is not controlling the vehicle, anomalous vehicle behavior would be manifested through changes in the closed-loop response of the vehicle and its disturbance-rejection abilities. Additionally, when the cockpit controls used in manual control are physically actuated during autopilot operation, the pilot may be able perceive the autopilot's control actions through kinesthetic or tactile feedback \cite{tan1994human, yang2007development}. In combination with the pilot's visual and vestibular sensing of vehicle dynamics, this sensing of autopilot control actions will allow the human pilot to determine the open-loop vehicle response and perceive anomalous behavior. We therefore hypothesize that an on-board human pilot has the sensory and perceptive capabilities to detect and diagnose anomalies such as those described above. 
+
+In addition to changes in closed-loop behavior in both anomalies introduced in Section \ref{sec:siso_problem}, the physical actuator fault would change the relationship between $u$ and $\delta_a$, while the time-delayed sensor measurements would change the relationship between $y_{H}$ and $y_{D}$, in addition to the closed-loop vehicle dynamics. We hypothesize that incorporating the human pilot in detection and decision-making tasks may allow the autopilot to retain autonomous control in applications where autonomous decision-making based purely on autonomous anomaly detection and diagnosis is infeasible due to reliability concerns, for example. 
+
+% TODO "onboard" or "on-board" everywhere
+
+% The adaptive autopilot may be used simultaneously in detection, by alerting the pilot to potential anomalies and proposing diagnostic actions, such as a prescribed sequence of control inputs to probe the vehicle response. 
+
+\section{The Overall Shared Controller}\label{sec:siso_sc_overall}
 \begin{figure}[h]
 	\centering
 	
@@ -284,7 +294,9 @@ Under nominal vehicle operation with the plant given by (\ref{eqn:2nd_order_late
 	\caption{Our proposal for shared decision making following an anomaly, with stages of decision making categorized in Ref.~\cite{parasuraman2000model}}
 	\label{fig:response_flow}
 \end{figure}
-The shared control algorithm between the adaptive autopilot and human pilot that we propose is as follows. At time $t=0$, the adaptive controller as in (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), and (\ref{eqn:qdot_projection}) is proposed, where the state $x_p$ is given as in (\ref{eqn:2nd_order_lateral}). An anomaly either as in case (i) or case (ii) is assumed to occur at $t=t_{s,p}$. 
+
+% TODO change t_{s,p} etc. to t_1^*, t_2^* everywhere
+% TODO change Post-Anomaly, Post-Correction to same as Ch.5The shared control algorithm between the adaptive autopilot and human pilot that we propose is as follows. At time $t=0$, the adaptive controller as in (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), and (\ref{eqn:qdot_projection}) is proposed, where the state $x_p$ is given as in (\ref{eqn:2nd_order_lateral}). An anomaly is assumed to occur at $t=t_{s,p}$. 
 
 Following this time instant, the pilot detects the anomalous vehicle dynamics, and at $t=t_{s,c}$ indicates to the adaptive autopilot the perceived increase in order. Using this pilot input, we propose an adaptive controller predicated on a third-order dynamics of the open-loop plant and assume that in addition to the bank angle and roll rate, angular acceleration $\dot{p}$ is also measurable. We choose a reference model as
 \begin{equation}

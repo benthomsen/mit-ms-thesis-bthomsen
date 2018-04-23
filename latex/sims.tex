@@ -1,9 +1,10 @@
 % Simulations
-\chapter{Anomaly Response Simulations}  \label{sec:numerical}
+\chapter{Anomaly Response Simulations}  \label{ch:numerical}
 \section{State Feedback}
 The two cases discussed above, of the introduction of actuator dynamics and a time delay, respectively, were simulated numerically in MATLAB/Simulink for bank angle tracking tasks. In these simulations, the commanded stability axis bank angle is a sequence of 5-second steps. In both of the examples presented here, the anomaly occurs at $t_{s,p} = 30$s, and the corrective action is applied to the controller at $t_{s,c} = 90$s.
 
-Numerical data for the Boeing 747 flying straight-and-level at Mach 0.25 at sea level\cite{heffley1972aircraft} was substituted into (\ref{eqn:2nd_order_lateral}) to constitute the following nominal plant dynamics, beginning at time $t = 0$
+% TODO make sure notation here is consistent with earlier
+Numerical data for the Boeing 747 flying straight-and-level at Mach 0.25 at sea level \cite{heffley1972aircraft} was substituted into (\ref{eqn:2nd_order_lateral}) to constitute the following nominal plant dynamics, beginning at time $t = 0$
 \begin{equation}
 		\dot{x}_p = \begin{bmatrix}
 			0 & \hfil 1 \\ 0 & -1.10
@@ -191,7 +192,7 @@ The transfer functions used to generate step response plots in Figure \ref{fig:s
 	\label{fig:step_delay}
 \end{figure}
 
-The shared control solution introduced in Section \ref{sec:shared_ctrl} is applied to the problem introduced in Section \ref{sec:problem} on a high altitude, long endurance (HALE) very flexible aircraft (VFA) model. The aircraft model used in simulation, developed by \cite{gibson2011modeling} for longitudinal control design applications, is rendered in Figure \ref{fig:vfa} and described in Section \ref{subsec:vfa_model}. The results of numerical simulations on the control and anomaly recovery with this MIMO plant are then presented in Section \ref{subsec:sims}, comparing the shared anomaly response to alternative anomaly responses.
+The shared control solution introduced in Chapter \ref{sec:shared_ctrl} is applied to the problem introduced in Section \ref{sec:mimo_problem} on a high altitude, long endurance (HALE) very flexible aircraft (VFA) model. The aircraft model used in simulation, developed by \cite{gibson2011modeling} for longitudinal control design applications, is rendered in Figure \ref{fig:vfa} and described in Section \ref{subsec:vfa_model}. The results of numerical simulations on the control and anomaly recovery with this MIMO plant are then presented in Section \ref{subsec:sims}, comparing the shared anomaly response to alternative anomaly responses.
 
 \section{Output Feedback}
 
@@ -387,7 +388,7 @@ In these simulations, the vehicle operates in nominal operation with the RSLQR+M
 	\label{fig:ar1-err}
 \end{figure}
 
-Numerical simulations of the AR-2 response (purely manual control) are not carried out, as they are not deterministic and require high-fidelity \textit{human-in-the-loop} experiments to characterize. The limitations of such a response -- in which the human operator's role changes suddenly from ``on-the-loop'' to ``in-the-loop'' with unfamiliar dynamics -- are discussed in the earlier sections of this paper.
+Numerical simulations of the AR-2 response (purely manual control) are not carried out, as they are not deterministic and require high-fidelity \textit{human-in-the-loop} experiments to characterize. The limitations of such a response -- in which the human operator's role changes suddenly from ``on-the-loop'' to ``in-the-loop'' with unfamiliar dynamics -- are discussed in the earlier sections of this thesis.
 
 Results of the AR-3 (shared control) anomaly response simulation are shown in Figs. \ref{fig:ar3-sim}--\ref{fig:ar3-err}. After the anomaly is introduced at $t = 600 s$, the ``nominal'' controller attempts to control the system whose dynamics are not fully accounted for in the control model. Simultaneously in the shared control framework, the human operator notices the anomalous closed-loop control behavior, and via an interface switches the controller to the higher relative degree design (\ref{eq:rd3-b1a})--(\ref{eq:rd3-adaptation-deriv}) at $t = 800 s$, which is the culmination of the human operator's action. For $t \geq 800 s$, the vehicle remains under autonomous control with the ``recovery'' adaptive controller and is able to reestablish nominal command tracking performance. For comparison, the time of structural failure in the passive anomaly response is plotted as a line at $t = 960 s$.
 

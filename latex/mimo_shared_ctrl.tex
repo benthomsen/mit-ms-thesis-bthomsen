@@ -1,11 +1,11 @@
 % Shared Control
 \chapter{Shared Control with Remote Human Pilot and Output Feedback}  \label{ch:mimo_shared_ctrl}
-We introduce a shared decision-making and control framework with the goal of enabling the safe operation of HALE UAVs subject to both parametric uncertainties and the sudden introduction of anomalous, unmodeled dynamics as described in the preceding section. The shared control framework is based on a combination of actions by UAV autopilots and remote human operators. MRAC autopilots and complementary higher-level motion planning algorithms allow for continuous autonomous operation of the UAVs under nominal conditions. Remote human operators monitor the performance of the vehicles and are trained and able to remotely pilot the vehicle in case of autopilot failure. The remote piloting of the vehicles, however, is a daunting task due to communication delays and a weakened understanding of the vehicle dynamics, state, and environment, due to the remote nature of the task. Our shared anomaly response involves the remote human operator to diagnose and correct for the dynamical anomaly without taking over manual control of the vehicle. In Section \ref{subsec:sc_adaptive}, we describe two adaptive autopilot designs which in combination with the human operator whose precise role is described subsequently in Section \ref{subsec:sc_human}, will solve the problem presented in Section \ref{sec:problem}.
+We introduce a shared decision-making and control framework with the goal of enabling the safe operation of HALE UAVs subject to both parametric uncertainties and the sudden introduction of anomalous, unmodeled dynamics as described in the preceding section. The shared control framework is based on a combination of actions by UAV autopilots and remote human operators. MRAC autopilots and complementary higher-level motion planning algorithms allow for continuous autonomous operation of the UAVs under nominal conditions. Remote human operators monitor the performance of the vehicles and are trained and able to remotely pilot the vehicle in case of autopilot failure. The remote piloting of the vehicles, however, is a daunting task due to communication delays and a weakened understanding of the vehicle dynamics, state, and environment, due to the remote nature of the task. Our shared anomaly response involves the remote human operator to diagnose and correct for the dynamical anomaly without taking over manual control of the vehicle. In Section \ref{subsec:sc_adaptive}, we describe two adaptive autopilot designs which in combination with the human operator whose precise role is described subsequently in Section \ref{subsec:sc_human}, will solve the problem presented in Section \ref{sec:mimo_problem}.
 
-%Division of responsibilities.
+% TODO merge all edits from CPHS paper
 
 \section{Adaptive Output-Feedback Control}\label{subsec:sc_adaptive}
-An autonomous controller is designed to track prescribed commands for plant outputs $z_p(t)$ in (\ref{eq:plant_dynamics}). The shared control framework involves separate MRAC designs for the plant (\ref{eq:plant_dynamics}) in combination with actuator dynamics (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}). The control design accommodating first-order actuators is denoted the ``nominal'' control design, and excluding exceptional failures, is the controller in use by the UAV autopilot. The control design accommodating second-order actuators is a predefined ``recovery'' controller, whose use case will be defined more fully in Section \ref{subsec:sc_human}. To achieve the control goals stated in Section \ref{sec:problem}, control design consists of
+An autonomous controller is designed to track prescribed commands for plant outputs $z_p(t)$ in (\ref{eq:plant_dynamics}). The shared control framework involves separate MRAC designs for the plant (\ref{eq:plant_dynamics}) in combination with actuator dynamics (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}). The control design accommodating first-order actuators is denoted the ``nominal'' control design, and excluding exceptional failures, is the controller in use by the UAV autopilot. The control design accommodating second-order actuators is a predefined ``recovery'' controller, whose use case will be defined more fully in Section \ref{subsec:sc_human}. To achieve the control goals stated in Section \ref{ch:problem}, control design consists of
 \begin{enumerate}[label=(\roman*)]
 	\item baseline control design using the robust servomechanism linear quadratic regulator method (RSLQR);
 	\item adaptive output-feedback augmentation for parametric uncertainties in the plant.
@@ -35,7 +35,7 @@ where $e_y = y - y_m$, $A_m = A - B_r K^T$ with $K\in\mathbb{R}^{n\times m}$ is 
 
 In what follows, control designs for the ``nominal'' controller and for the ``recovery'' controller are summarized, assuming (for simplicity, but without loss of generality) that the augmented plant model (\ref{eq:augmented_plant}) is square (i.e. $m = p$). Readers are referred to \cite{qu2016phd} and \cite{qu2016adaptive} for a more thorough treatment of the adaptive control designs in this article. 
  
-\subsection{Nominal Adaptive Control Design}
+\subsection{Nominal Adaptive Controller}
 %Relative degree two MIMO adaptive control.
 % need a11, a10, B_1^a, Cbar, S, Rinv, epsilon, L, two tuner laws, u, F
 The control design for the plant with first-order actuator dynamics summarized by giving definitions for CRM residual gain matrix $L$, function $\mathcal{F}_2(t)$, control law $u(t)$, and parameter adaptation. Note that $B_2$ represents $B_r$ from (\ref{eq:augmented_plant}) for this relative degree two plant. 
@@ -90,7 +90,7 @@ where $\hat{\Psi}_{\Lambda}(t)$ is a matrix of adaptive parameters. The laws for
 \end{equation}
 with diagonal adaptation gains $\Gamma_{m}, \;\Gamma_{\Lambda} > 0$. We note that the derivatives of the adaptive parameters, computed in (\ref{eq:rd2-adaptation}), are used to implement (\ref{eq:F2}) and (\ref{eq:u_rd2}) with the product rule of differentiation.
 
-\subsection{Recovery Adaptive Control Design}
+\subsection{Recovery Adaptive Controller}
 Control design with the second-order actuator model is similar to that described above, but requires modifications to ensure strict positive realness of the transfer matrix of the model-following error dynamics. 
 
 The definition of $L$ is modified by replacing $B_1^a$ in (\ref{eq:rd2-b1a}) with
