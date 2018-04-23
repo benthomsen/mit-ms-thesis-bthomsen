@@ -1,54 +1,18 @@
 \chapter{Shared Control with Human Pilot and State Feedback} \label{ch:siso_shared_ctrl}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% TODO rethink where to put all this lat-dir specific stuff
-% TODO make sure notation here is consistent with earlier
-
-\section{Aircraft Rolling Mode Dynamics}
-As the specifics of our shared decision-making and control architecture are highly application dependent, in this chapter we will focus on the lateral-directional dynamics of a fixed-wing aircraft, which are described briefly. Chapter \ref{ch:mimo_shared_ctrl} will present the architecture in a more general form. For an aircraft trimmed in straight and level flight with equilibrium speed $u_0$ and pitch angle $\theta_0$, and assuming small perturbations about the equilibrium point, the lateral-directional dynamics of the aircraft can be linearized to the form $\dot{x}_{\mathrm{lat}} = A_{\mathrm{lat}} x_{\mathrm{lat}} + B_{\mathrm{lat}} u_{\mathrm{lat}}$ where
-\begin{eqnarray}
-	x_{\mathrm{lat}} &=& \begin{bmatrix}\beta & p_s & \phi_s & r_s \end{bmatrix}^T, \qquad u_{\mathrm{lat}} = \begin{bmatrix}\delta_r & \delta_a \end{bmatrix}^T \nonumber \\
-	A_{\mathrm{lat}} &=& \begin{bmatrix}
-			\frac{Y_\beta}{u_0} & \frac{Y_p}{u_0} & \frac{g_0\cos{\theta_0}}{u_0} & \frac{Y_r}{u_0} - 1 \\
-			L_\beta & L_p & 0 & L_r \\
-			0 & 1 & 0 & 0 \\
-			N_\beta & N_p & 0 & N_r
-		\end{bmatrix}, \qquad B_{\mathrm{lat}} = \begin{bmatrix}
-			\frac{Y_{\delta_r}}{u_0} & \frac{Y_{\delta_a}}{u_0} \\
-			L_{\delta_r} & L_{\delta_a} \\
-			0 & 0 \\
-			N_{\delta_r} & N_{\delta_a} 
-		\end{bmatrix}
-\end{eqnarray}
-\noindent with definitions of the stability and control derivatives in matrices $A_{\mathrm{lat}}$ and $B_{\mathrm{lat}}$ skipped for brevity (see Ref.~\cite{lavretsky2013robust} for more details). The states correspond to sideslip angle, stability axis roll rate, stability axis bank angle, and stability axis yaw rate, respectively, while the control inputs correspond to rudder and aileron deflections.
-
-Approximate second-order linearized rolling mode dynamics are extracted from this fourth-order system, and this system is given by
-\begin{equation}
-	\underbrace{\begin{bmatrix}
-			\dot{\phi} \\ \dot{p}
-		\end{bmatrix}}_{\dot{x}_p} = \underbrace{\begin{bmatrix}
-			0 & 1 \\ 0 & L_p
-		\end{bmatrix}}_{A_p} \underbrace{\begin{bmatrix}
-			\phi \\ p
-		\end{bmatrix}}_{x_p} + \underbrace{\begin{bmatrix}
-			0 \\ L_{\delta_a}
-		\end{bmatrix}}_{B_p} \underbrace{\delta_a}_{u_p}
-	\label{eqn:2nd_order_lateral}
-\end{equation} \noindent with an open-loop transfer function
-\begin{equation}
-		\frac{\Phi(s)}{\Delta_a(s)} = \frac{L_{\delta_a}}{s^2 - L_p s}
-\end{equation}
-
-In these equations, $\delta_a$ represents aileron input, and $\phi$ and $p$ denote the aircraft bank angle and roll rate in stability axes, with the subscript $(\cdot)_s$ dropped for notational simplicity. It is assumed that the states ($x_p$) are fully available for feedback (directly from sensors for $p$, and via integration of $p$ for $\phi$). $L_p$ is the roll damping derivative and $L_{\delta_a}$ is the rolling moment due to aileron deflection. We consider scenarios in which these parameters may be unknown, but are addressed in normal operation by an MRAC-based adaptive autopilot. The system has been simplified by fixing $\delta_r(t) = 0$ (no rudder input), so that aileron deflection is the only input. In normal operation, we assume the vehicle has sufficiently fast actuators, so that $\delta_a(t) = u(t)$ and equivalently $\Delta_a(s) = U(s)$, where $u(t)$ is the control signal. 
-
 % TODO get rid of "case (x)" notation
+% TODO add a short overview of shared control solution here before autopilot
 
-% TODO organize in same order as OFAC section: MRAC then human
+In this chapter, we introduce a shared control architecture between human pilots and adaptive control algorithms to address the problems defined in Section \ref{sec:siso_problem}.
 
 \section{Adaptive Autopilot} \label{sec:siso_sc_adaptive}
 Central to this work is the use of an autopilot which employs advanced control principles for low-level flight control tasks in the place of human pilots. In particular, our autopilot design uses adaptive control with vehicle states available for feedback \cite{narendra2012stable}. Closed-loop reference models (CRMs) based on Ref.~\cite{gibson2013adaptive} are utilized here to improve the transient performance of adaptive control, in comparison to open-loop reference models.
 
-The plant to be controlled is an \textit{n}th-order linear dynamical system given in (\ref{eq:siso_plant}). We design a feedforward/feedback control law of the form
+In this section, a \textit{nominal} adaptive controller is defined for the \textit{n}th-order linear plant given in (\ref{eq:siso_plant}). A \textit{recovery} adaptive controller is then defined for the (\textit{n+1})th-order plant given in (\ref{eqn:plant_3_compact}).
+
+\subsection{Nominal Adaptive Controller}
+We design a feedforward/feedback control law of the form
 \begin{equation}
 	u(t) = \theta(t) x_p(t) + q(t) r(t)
 	\label{eqn:control_law}
@@ -189,7 +153,7 @@ The reference model used in this adaptive controller is a dynamical system
 	\label{fig:mrac_block}
 \end{figure}
 
-To ensure robustness of the adaptive controller, a projection operator\cite{pomet1992adaptive, lavretsky2011projection} is used in conjunction with the adaptive laws (\ref{eqn:adaptive_law_theta}) and (\ref{eqn:adaptive_law_gamma}). The projection operator limits the magnitude of $\dot{\theta}(t)$ and $\dot{q}(t)$, so that the parameters $\theta(t)$ and $q(t)$ remain within a convex set. The reader is referred to Ref.~\cite{gibson2013adaptive} for a detailed treatment of the projection operator as it applies to the general CRM-adaptive controller, but to summarize, the adaptive laws are modified from (\ref{eqn:adaptive_law_theta}) and (\ref{eqn:adaptive_law_gamma}) to be
+To ensure robustness of the adaptive controller, a projection operator \cite{pomet1992adaptive, lavretsky2011projection} is used in conjunction with the adaptive laws (\ref{eqn:adaptive_law_theta}) and (\ref{eqn:adaptive_law_gamma}). The projection operator limits the magnitude of $\dot{\theta}(t)$ and $\dot{q}(t)$, so that the parameters $\theta(t)$ and $q(t)$ remain within a convex set. Readers are referred to Ref.~\cite{gibson2013adaptive} for a detailed treatment of the projection operator as it applies to the general CRM-adaptive controller, but to summarize, the adaptive laws are modified from (\ref{eqn:adaptive_law_theta}) and (\ref{eqn:adaptive_law_gamma}) to be
 \begin{eqnarray}
 	\dot{\theta}(t) &=& \text{Proj}(- \Gamma_\theta B_m^T P e(t) x_p^T(t),\text{ } \theta(t)) \label{eqn:thetadot_projection} \\
 	\dot{q}(t) &=& \text{Proj}(- \gamma_q B_m^T P e(t) r(t),\text{ } q(t)) \label{eqn:qdot_projection}
@@ -213,27 +177,10 @@ To ensure robustness of the adaptive controller, a projection operator\cite{pome
 \end{equation}
 \noindent where $\varphi_{m}$ and $(\varphi_{m} + \varphi_{\epsilon})$ define ``soft'' and ``hard'' bounds on the parameter $\varphi$, respectively.
 
-Under nominal vehicle operation with the plant given by (\ref{eqn:2nd_order_lateral}), a second-order reference model corresponding to (\ref{eqn:crm}) is used
-\begin{equation}
-	\underbrace{\begin{bmatrix}
-		\dot{\phi}_d \\ \dot{p}_d
-	\end{bmatrix}}_{\dot{x}_m} = \underbrace{\begin{bmatrix}
-		0 & 1\\ -a_{m,1} & -a_{m,2}
-	\end{bmatrix}}_{A_m} \underbrace{\begin{bmatrix}
-		\phi_d \\ p_d
-	\end{bmatrix}}_{x_m} + \underbrace{\begin{bmatrix}
-		0 \\ b_{m,2}
-	\end{bmatrix}}_{B_m} r(t) - L_m e(t)
-	\label{eqn:rm_2_symbolic}
-\end{equation}
-\noindent where $x_m(t)$ is a vector of the desired states and $r(t)$ is the commanded bank angle. It is straightforward to see that a choice of
-\begin{eqnarray}
-	\theta^* &=& \left[ \frac{-a_{m,1}}{L_{\delta_a}} \quad \frac{-a_{m,2}-L_p}{L_{\delta_a}} \right] \label{e:tstar}\\
-	q^* &=& \frac{b_{m,2}}{L_{\delta_a}} \label{e:qstar}
-\end{eqnarray} 
-\noindent solves the matching condition in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}). This in turn implies that even if the roll damping derivative ($L_p$) and the rolling moment due to aileron deflection ($L_{\delta_a}$) are unknown, the adaptive controller in (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), and (\ref{eqn:qdot_projection}) will be able to vary the feedback and feedforward gains such that the closed-loop response of the system is satisfactory. We shall denote such a case as nominal operation, and consider the anomalous cases as those where in addition to parametric uncertainties, changes in dynamics as described in Sections \ref{subsec:siso_act_fault} and \ref{subsec:siso_delay} occur.
+\subsection{Recovery Adaptive Controller}
+The \textit{recovery} adaptive controller here uses a control design similar to the \textit{nominal} adaptive controller described above, however it is designed based on a higher-order model of the plant. In order to satisfy the matching conditions for adaptive control given in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}), a corresponding higher-order reference model, accommodating additional state information, must be designed.
 
-% TODO BOOKMARK (check problems with new organization of mrac then human)
+% TODO finish describing n+1th order controller
 
 \section{Human Pilot} \label{sec:siso_sc_human}
 % TODO make this similar to role of remote human operator
@@ -298,6 +245,14 @@ In addition to changes in closed-loop behavior in both anomalies introduced in S
 % TODO change t_{s,p} etc. to t_1^*, t_2^* everywhere
 % TODO change Post-Anomaly, Post-Correction to same as Ch.5The shared control algorithm between the adaptive autopilot and human pilot that we propose is as follows. At time $t=0$, the adaptive controller as in (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), and (\ref{eqn:qdot_projection}) is proposed, where the state $x_p$ is given as in (\ref{eqn:2nd_order_lateral}). An anomaly is assumed to occur at $t=t_{s,p}$. 
 
+% TODO move third-order stuff to numerical section
+Following this time instant, the pilot detects the anomalous vehicle dynamics, and at $t=t_{s,c}$ indicates to the adaptive autopilot the perceived increase in order. Using this pilot input, we propose an adaptive controller predicated on a higher-order dynamics of the open-loop plant and assume that in addition to the plant output and its first time derivative, the second derivative of the plant output is available for feedback control. 
+
+The time interval $[t_{s,p}, \quad t_{s,c}]$ is indicated as Post-Anomaly and the interval $t \geq t_{s,c}$ is indicated as Post-Correction. For the case of an actuator anomaly as in (\ref{eqn:actuator_dynamics_symbolic}), $\theta^* \in \mathbb{R}^3$ and $q^*$ exist that solve the corresponding matching conditions in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}), and an adaptive controller as in (\ref{eqn:thetadot_projection}) and (\ref{eqn:qdot_projection}) can be realized to lead to a stable closed-loop solutions and accurate tracking. These matching conditions are not met, however, in the case of the anomaly causing time-delayed sensor measurements (\ref{eqn:delay_approx_diffeq}). In the numerical examples, we will discuss the details of how such an adaptive controller with an increase in dimension following the pilot input performs for both cases of anomalies. 
+A detailed discussion of the stability of the resulting adaptive controller is not carried out in this thesis. But it is clear that if the Post-Anomaly phase is sufficiently short, the adaptive controller will guarantee boundedness of the closed-loop system and convergence of $e(t)$ to zero if our assumptions that the cause of the two anomalies results in an $(n+1)$-order plant and that its states are measurable are satisfied. We carry out a detailed simulation study in the following section and evaluate the performance of the shared controller proposed above.
+
+\begin{comment}
+
 Following this time instant, the pilot detects the anomalous vehicle dynamics, and at $t=t_{s,c}$ indicates to the adaptive autopilot the perceived increase in order. Using this pilot input, we propose an adaptive controller predicated on a third-order dynamics of the open-loop plant and assume that in addition to the bank angle and roll rate, angular acceleration $\dot{p}$ is also measurable. We choose a reference model as
 \begin{equation}
 	\underbrace{\begin{bmatrix}
@@ -314,4 +269,5 @@ Following this time instant, the pilot detects the anomalous vehicle dynamics, a
 
 The time interval $[t_{s,p}, \quad t_{s,c}]$ is indicated as Post-Anomaly and the interval $t \geq t_{s,c}$ is indicated as Post-Correction. For case (i), $\theta^* \in \mathbb{R}^3$ and $q^*$ exist that solve the corresponding matching conditions in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}), and an adaptive controller as in (\ref{eqn:thetadot_projection}) and (\ref{eqn:qdot_projection}) can be realized to lead to a stable closed-loop solutions and accurate tracking. These matching conditions are not met, however, in case (ii). In the numerical examples, we will discuss the details of how such an adaptive controller with an increase in dimension following the pilot input performs for both cases of anomalies. 
 A detailed discussion of the stability of the resulting adaptive controller is not carried out in this thesis. But it is clear that if the Post-Anomaly phase is sufficiently short, the adaptive controller will guarantee boundedness of the closed-loop system and convergence of $e(t)$ to zero if our assumptions that the cause of the two anomalies results in a third-order plant and that its states are measurable are satisfied. We carry out a detailed simulation study in the following section and evaluate the performance of the shared controller proposed above.
+\end{comment}
 

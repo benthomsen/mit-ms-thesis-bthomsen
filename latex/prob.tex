@@ -51,7 +51,7 @@ An anomaly is introduced which changes the actuator dynamics from a direct input
 \end{equation} 
 \noindent so that the dynamics of plant augmented with actuator dynamics change suddenly from order $n$ to order $n+1$. We can define an augmented plant 
 \begin{equation}
-	\dot{x}_p' = A_p' x_p' + B_p' u	
+	\dot{x}_p' = A_p' x_p' + B_p' u	\label{eqn:plant_3_compact}
 \end{equation}
 where $u(t)$ is defined in (\ref{eqn:actuator_dynamics_symbolic}), and $x_p'$ consists of the output $y_p$ and its first $n$ time derivatives. The matrix $A_p'$ and vector $B_p'$ are then given by
 \begin{equation}
@@ -79,20 +79,19 @@ where $I_n$ is the identity matrix of dimension $n$ and $\alpha_i', \, \beta'$ a
 \subsection{Time-Delayed Sensor Measurements} \label{subsec:siso_delay}
 We consider the introduction an anomaly in the cyber-physical space consisting of the dynamical system with feedback control via adaptive control algorithms, which leads to latency in the feedback of plant state information. We model this anomaly as the addition of a time delay $\tau$ of the state measurements before the computation of the control input, causing a discrepancy between the plant state $x_p$ and the state as sensed by the controller, denoted $x_\sigma$, given by
 \begin{equation}
-	x_\sigma(t) = x_p(t - \tau).
+	x_\sigma(t) = x_p(t - \tau). \label{eqn:delay_approx_diffeq}
 \end{equation}
 
 We note that the time delay $\tau$ may be approximated up to a certain frequency as a first-order filter, given in the Laplace frequency domain as
 \begin{equation}
 	e^{-\tau s} \approx \frac{1}{1 + \tau s}.
-	\label{first_order_delay_approx}
 \end{equation}
 In the time domain, this approximation corresponds to the differential equation
 \begin{equation}
 	\tau \dot{x}_{\sigma}(t) + x_{\sigma}(t) \approx x_p(t)	
 \end{equation}
 
-We note that this effectively increases the order of the plant from $n$ to $n+1$ when we consider the output to be the delayed signal. In this case, the augmented plant is given by
+We note that this effectively increases the order of the plant from $n$ to $n+1$ when we consider the output to be the delayed signal. In this case, using the time delay approximation of (\ref{eqn:delay_approx_diffeq}), the augmented plant model is given by
 \begin{equation}
 	\dot{x}_\sigma' = A_p' x_\sigma' + B_p' u \label{eqn:plant_3_tau}
 \end{equation}
