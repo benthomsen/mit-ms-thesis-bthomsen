@@ -1,11 +1,12 @@
 % Shared Control
 \chapter{Shared Control with Remote Human Pilot and Output Feedback}  \label{ch:mimo_shared_ctrl}
-We introduce a shared decision-making and control framework with the goal of enabling the safe operation of HALE UAVs subject to both parametric uncertainties and the sudden introduction of anomalous, unmodeled dynamics as described in the preceding section. The shared control framework is based on a combination of actions by UAV autopilots and remote human operators. MRAC autopilots and complementary higher-level motion planning algorithms allow for continuous autonomous operation of the UAVs under nominal conditions. Remote human operators monitor the performance of the vehicles and are trained and able to remotely pilot the vehicle in case of autopilot failure. The remote piloting of the vehicles, however, is a daunting task due to communication delays and a weakened understanding of the vehicle dynamics, state, and environment, due to the remote nature of the task. Our shared anomaly response involves the remote human operator to diagnose and correct for the dynamical anomaly without taking over manual control of the vehicle. In Section \ref{subsec:sc_adaptive}, we describe two adaptive autopilot designs which in combination with the human operator whose precise role is described subsequently in Section \ref{subsec:sc_human}, will solve the problem presented in Section \ref{sec:mimo_problem}.
+The shared control framework we propose is designed so as to combine the merits of both adaptive control algorithms and remote human operators. Adaptive autopilots and complementary higher-level motion planning algorithms allow for continuous autonomous operation of the vehicle in the presence of parametric uncertainties $\Theta_p$, $\Lambda_p$, and $\Theta_1$. Remote human operators monitor the performance of the vehicles and are trained and able to remotely pilot the vehicle in case of autopilot failure. The remote piloting of the vehicles, however, is a daunting task due to communication delays and a weakened understanding of the vehicle dynamics, state, and environment, due to the remote nature of the task. Our shared anomaly response tasks the human operator with providing key inputs based on higher-level perception of the anomaly, but delegates the low-level regulation and command tracking tasks to adaptive control algorithms which make use of these inputs. In Section \ref{subsec:sc_adaptive}, we describe two adaptive autopilot designs which in combination with the human operator whose precise role is described subsequently in Section \ref{subsec:sc_human}, will solve the problem which was presented in Section \ref{sec:mimo_problem}. The overall shared control architecture is summarized in Section \ref{subsec:sc_overall}.
 
 % TODO merge all edits from CPHS paper
-
+% TODO add LQR cost function in order to give numerical values
+% TODO get rid of quotes on nominal, recovery
 \section{Adaptive Output-Feedback Control}\label{subsec:sc_adaptive}
-An autonomous controller is designed to track prescribed commands for plant outputs $z_p(t)$ in (\ref{eq:plant_dynamics}). The shared control framework involves separate MRAC designs for the plant (\ref{eq:plant_dynamics}) in combination with actuator dynamics (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}). The control design accommodating first-order actuators is denoted the ``nominal'' control design, and excluding exceptional failures, is the controller in use by the UAV autopilot. The control design accommodating second-order actuators is a predefined ``recovery'' controller, whose use case will be defined more fully in Section \ref{subsec:sc_human}. To achieve the control goals stated in Section \ref{ch:problem}, control design consists of
+An autonomous controller is designed to track prescribed commands for plant outputs $z_p(t)$ in (\ref{eq:plant_dynamics}). The shared control framework involves separate adaptive control designs for the plant (\ref{eq:plant_dynamics}) in combination with actuator dynamics (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}). The control design accommodating first-order actuators is denoted the \textit{nominal} adaptive control design, and excluding exceptional failures, is the controller in use by the autopilot. The control design accommodating second-order actuators is a predefined \textit{recovery} adaptive controller, whose use case will be defined more fully in Section \ref{subsec:sc_human}. To achieve the control goals stated in Section \ref{ch:problem}, control design consists of
 \begin{enumerate}[label=(\roman*)]
 	\item baseline control design using the robust servomechanism linear quadratic regulator method (RSLQR);
 	\item adaptive output-feedback augmentation for parametric uncertainties in the plant.
@@ -25,16 +26,18 @@ y=Cx,\qquad z=C_{z}x
 \end{equation}
 where $x\in\mathbb{R}^{n}$, $u\in\mathbb{R}^{m}$, $y\in\mathbb{R}^{p}$ are redefined states, inputs and outputs, respectively. 
 %A full justification for this form of the plant can be found in \cite{qu2016phd, qu2016adaptive}. 
-This plant contains unknown matrices $\Psi_1$, $\Psi_r$, and $\Lambda$, which hold the state-dependent plant uncertainties, state-dependent actuator dependencies, and actuator effectiveness, respectively. The exact forms of $B_r$ and $\Psi_r$ depend on whether the actuators are first-order (\ref{eq:first_order_act}) or second-order (\ref{eq:second_order_act}), and the subscript $r$ indicates the relative degree of the augmented plant. It is noted that the augmented plant model which arises from the inclusion of actuator model (\ref{eq:first_order_act}) in the plant (\ref{eq:plant_dynamics}) has relative degree two, while the augmented plant model associated with the inclusion of actuator model (\ref{eq:second_order_act}) has relative degree three. 
+This plant has unknown matrices $\Psi_1$, $\Psi_r$, and $\Lambda$, which contain plant uncertainties ($\Theta_p$), actuator uncertainties ($\Theta_i$ in (\ref{eq:first_order_act}) and (\ref{eq:second_order_act})), and control effectiveness ($\Lambda_p$), respectively. The exact forms of $B_r$ and $\Psi_r$ depend on whether the actuators are first-order (\ref{eq:first_order_act}) or second-order (\ref{eq:second_order_act}), and the subscript $r$ indicates the relative degree of the augmented plant. It is noted that the augmented plant model which arises from the inclusion of actuator model (\ref{eq:first_order_act}) in the plant (\ref{eq:plant_dynamics}) has relative degree two, while the augmented plant model associated with the inclusion of actuator model (\ref{eq:second_order_act}) has relative degree three. 
 
-For control design, closed-loop reference models (\cite{gibson2013adaptive}) are designed as
+For control design, closed-loop reference models \cite{gibson2013adaptive} are designed as
 \begin{equation}
 \dot{x}_m = A_m x_m + B_z z_{cmd} + L e_y + \mathcal{F}_r(t), \quad y_m = C x_m
 \end{equation}
 where $e_y = y - y_m$, $A_m = A - B_r K^T$ with $K\in\mathbb{R}^{n\times m}$ is a baseline feedback control gain designed for the system without uncertainty using RSLQR, as described by \cite{lavretsky2013robust}. $L$ is a Luenberger-like feedback gain, and $\mathcal{F}_r(t)$ is a function used when $r \geq 2$ to recover stability properties in the presence of uncertainty. 
 
-In what follows, control designs for the ``nominal'' controller and for the ``recovery'' controller are summarized, assuming (for simplicity, but without loss of generality) that the augmented plant model (\ref{eq:augmented_plant}) is square (i.e. $m = p$). Readers are referred to \cite{qu2016phd} and \cite{qu2016adaptive} for a more thorough treatment of the adaptive control designs in this article. 
+In what follows, we define a \textit{nominal} adaptive autopilot for the plant (\ref{eq:augmented_plant}) as one that successfully accommodates actuator dynamics in the form of (\ref{eq:first_order_act}) and unknown $\Theta_p$, $\Theta_1$, and $\Lambda_p$. We define a \textit{recovery} adaptive autopilot to be one that is successful in accommodating actuator dynamics (\ref{eq:second_order_act}), i.e., when it is known that the relative degree is three, with uncertain parameters $\Theta_p$, $\Theta_1$, $\Theta_2$, and $\Lambda_p$. We restrict our attention in this chapter to augmented plant model (\ref{eq:augmented_plant}) which are square (i.e. the number of inputs, $m$, is equal to the number of outputs, $p$). For details of closed-loop stability guarantees with the nominal and recovery adaptive controllers, readers are referred to \cite{qu2016adaptive} and \cite{qu2016phd}, respectively.
  
+% TODO show Laplace domain representations (transfer functions) as well as diff. eqs
+% TODO give definitions of \hat{\Psi_\Lambda} and \hat{\Psi_m}
 \subsection{Nominal Adaptive Controller}
 %Relative degree two MIMO adaptive control.
 % need a11, a10, B_1^a, Cbar, S, Rinv, epsilon, L, two tuner laws, u, F
@@ -118,7 +121,7 @@ which is used to define filtered error signals $\overline{e}_{\mathcal{I}y}^{[1]
 \begin{equation}
 \begin{aligned}
 	\Pi \big \{  \overline{e}_{\mathcal{I}y}^{[1]} (t) \big \} &= (\alpha_1 \frac{d}{dt} + \alpha_2 \frac{d^2}{dt^2}) \big \{ \hat{\Phi}_1^T (t) e_{y}^{\mathcal{I}}(t) \big \} \\
-	\Pi \big \{  \overline{e}_{\mathcal{I}y}^{[1][2]} (t) \big \} &= (\alpha_2 \frac{d}{dt}) \big \{ \hat{\Lambda}(t) \overline{e}_{\mathcal{I}y}^{[1]} (t) \big \}
+	\Pi \big \{  \overline{e}_{\mathcal{I}y}^{[1][2]} (t) \big \} &= (\alpha_2 \frac{d}{dt}) \big \{ \hat{\Lambda}^T(t) \overline{e}_{\mathcal{I}y}^{[1]} (t) \big \}
 \end{aligned} \label{eq:eIy_rd3}
 \end{equation}
 where $\hat{\Phi}_1(t)$ and $\hat{\Lambda}(t)$ are matrices of adaptive parameters. We define operators
@@ -156,7 +159,7 @@ The regressor vector $\mathcal{X}(t)$ is redefined as
 \mathcal{X}(t) = \big[ (K^T \overline{x}_m^{[2]})^T,\quad \overline{v}_m^T,\quad \overline{x}_m^{[1]T},\quad \overline{x}_m^{[2]T} \big]^T.
 \end{equation}
 
-The control law $u(t)$ for the ``recovery'' controller is
+The control law $u(t)$ for the recovery adaptive controller is
 \begin{equation}
 \begin{aligned}
 	u (t) = -&\Pi \big \{ \hat{\Psi}^T(t) \mathcal{X}(t) \big \} \\ - & (\alpha_1 \frac{d}{dt} + \alpha_2 \frac{d^2}{dt^2}) \big \{ \hat{\Phi}_1^T(t) \big \} e_y^\mathcal{I} (t) 
@@ -176,7 +179,7 @@ In this controller, the laws for parameter adaptation use second-order tuners as
 \end{equation}
 and associated matrix of adaptive parameters
 \begin{equation}
-\hat{\Theta}(t) = \big[ \hat{\phi}_1^T(t),\quad \hat{\phi}_2^T(t),\quad \hat{\Lambda}^T(t) \big].
+\hat{\Theta}(t) = \big[ \hat{\phi}_1^T(t),\quad \hat{\phi}_2^T(t),\quad \hat{\Lambda}^T(t) \big]^T.
 \end{equation}
 
 Inputs to the second-order tuners are calculated by integrating
@@ -223,22 +226,30 @@ where $C_T^{\delta}, C_T^{\delta \delta} \in \mathbb{R}^{m \times 2m}$ are block
 
 \section{Human Supervisor}\label{subsec:sc_human}
 %Notices, reacts, instructs.
-We task the remote human supervisor with the following three responsibilities for shared anomaly response on the HALE VFA platform.
+We task the remote human supervisor with the following three responsibilities for shared anomaly response.
 \begin{enumerate}[label=\arabic*.]
-	\item Timely detection and characterization of anomalous closed-loop dynamical behavior
-	\item Isolation of control loop with anomalous behavior (i.e. longitudinal or lateral-directional)
+	\item Timely detection of anomalous closed-loop dynamical behavior
+	\item Isolation and characterization of anomaly
 	\item Commanding a change from nominal autopilot (\ref{eq:rd2-b1a})--(\ref{eq:rd2-adaptation}) to recovery autopilot (\ref{eq:rd3-b1a})--(\ref{eq:rd3-adaptation-deriv})
 \end{enumerate}
-
 The first task requires an attentive human operator able to discern that 
 \begin{enumerate}[label=(\alph*)]
 	\item an anomaly has occurred and control performance degradation is not caused solely by external disturbances;
 	\item swift action must be taken in order to recover stability and performance;
 	\item it may be possible to recover stability and performance via corrective action.
+\end{enumerate}	
+For the second task, the human operator must
+\begin{enumerate}[label=(\alph*)]
+	\item understand which control loop (e.g. pitch mode, roll mode, airspeed, in a fixed-wing UAV application) is affected by anomaly;
+	\item perceive an increased lag in plant response to commands.
 \end{enumerate}
+%The second task requires a human operator with knowledge and familiarity with the plant dynamics and control structure to understand which control loop (e.g. pitch mode, roll mode, airspeed, in a fixed-wing UAV application) is the source of the anomalous dynamics. 
+The final task for the trained remote human operator is the transfer of this diagnosis to the autopilot, by changing the relevant controller to its recovery mode.
 
-The second task requires a human operator with knowledge and familiarity with the VFA dynamics and control structure to understand which control loop (e.g. pitch mode, roll mode, airspeed) is the source of the anomalous dynamics. 
+%Note that while the remote human operator is assumed to have the training and controls necessary to disable all autopilot functionality and control the vehicle manually, this shared anomaly response deliberately circumvents any \textit{human-in-the-loop} (manual) control. 
 
-The final task for the trained remote human operator is the transfer of this diagnosis to the autopilot, by changing the relevant controller to its ``recovery'' mode.
+\section{Overall Shared Controller}\label{subsec:sc_overall}
+The shared control architecture between adaptive autopilots and a human operator that we propose is as follows. Before the occurrence of an anomaly, the nominal adaptive autopilot with control action defined in (\ref{eq:u_rd2}) is used to control the plant. An anomaly which abruptly changes actuator dynamics from (\ref{eq:first_order_act}) to (\ref{eq:second_order_act}) is assumed to occur at $t := t_1^*$. Following this time instant, the human operator is responsible for carrying out tasks 1--3 before the time limit at which failure would occur without action ($t:=t_3^*$). The completion of task 3 by the human ($t := t_2^*$) results in a switch to the recovery adaptive autopilot with control action as in (\ref{eq:u_rd3}). 
 
-Note that while the remote human operator is assumed to have the training and controls necessary to disable all autopilot functionality and control the vehicle manually, this shared anomaly response deliberately circumvents any \textit{human-in-the-loop} (manual) control. 
+Note that our shared control architecture does not involve a handover of regulation and command tracking tasks to the human following an anomaly. Instead, in our shared control architecture, the human operator is responsible for high-level cognition tasks while adaptive autopilots retain responsibility for low-level regulation, therefore directly leveraging and combining their complementary merits.
+A detailed discussion of the stability of the closed-loop system with the overall shared controller is not carried out in this paper. But it is clear that if the human completes tasks 1--3 sufficiently fast (i.e., $t_2^* < t_3^*$), then the shared controller will guarantee boundedness of the closed-loop system and convergence of $e(t) = x(t) - x_m(t)$ to zero if our assumptions are satisfied. We carry out a detailed simulation study in the following chapter and evaluate the performance of the shared controller proposed above.

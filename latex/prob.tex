@@ -111,26 +111,26 @@ with $A_p'$ and $B_p'$ defined in (\ref{eqn:plant_3_symbolic}). Due to this simi
 %\end{equation}
 
 \section{Remote Human Operation and Output Feedback Adaptive Control}  \label{sec:mimo_problem}
-We consider the distinct problem of controlling linear multi-input multi-output (MIMO) plant models of the form
+Here we consider the problem of controlling linear multi-input multi-output (MIMO) plant models of the form
 \begin{equation}
 \begin{gathered}
 \dot x_p = (A_p + B_p \Theta_p^T) x_p + B_p \Lambda_p u_p \\
 y_p = C_p x_p, \qquad z_p = C_{pz} x_p \label{eq:plant_dynamics}
 \end{gathered}
 \end{equation}
-where uncertain dynamics lead to the introduction of unknown $\Theta_p$ and $\Lambda_p$ in the plant model, $y_p$ are measurement outputs, and $z_p$ are regulated outputs which we would like to follow prescribed commands. It is assumed that the matrix $CB$ has full rank, and thus the plant has uniform relative degree one (see \cite{qu2016adaptive}). In addition to the dynamics (\ref{eq:plant_dynamics}), the plant's actuators have the first-order dynamics
+where $x_p$ is the plant state, $u_p$ is the plant input, $y_p$ is measured output, and $z_p$ is regulated output. Uncertain dynamics lead to the introduction of unknown $\Theta_p$ and $\Lambda_p$ in the plant model. It is assumed that the matrix $CB$ has full rank, and thus the plant has uniform relative degree one (see \cite{qu2016adaptive}). In addition to the dynamics (\ref{eq:plant_dynamics}), the plant's actuators have the first-order dynamics
 \begin{equation}
 	\dot{u}_p + (D_1 + \Theta_1^T) u_p = D_1 u \label{eq:first_order_act}
 \end{equation}
-where $D_1$ is a diagonal matrix representing nominal actuator parameters and $\Theta_1$ models uncertainty in the actuator dynamics. 
+where $D_1$ is a diagonal matrix representing nominal actuator parameters and $\Theta_1$ models uncertainty in the actuator dynamics. The problem is to choose $u(t)$ such that $z_p(t)$ tracks an external command $z_{cmd}(t)$ as closely as possible.
 %Model reference adaptive control (MRAC) with output feedback and closed-loop reference models, such as the method of \cite{qu2016adaptive}, can achieve asymptotic tracking and guarantee stability for this control problem. 
 
 \subsection{Actuator Fault} \label{subsec:mimo_act_fault}
-Consider the occurrence of an anomaly which causes a sudden change in actuator dynamics from (\ref{eq:first_order_act}) to the second-order model
+Consider the occurrence of an anomaly which causes an abrupt change in actuator dynamics from (\ref{eq:first_order_act}) to the second-order model
 \begin{equation}
-	\ddot{u}_p + (D_2 + \Theta_2^T) \dot{u}_p + (D_1 + \Theta_1^T) u_p = D_1 u. \label{eq:second_order_act}
+	\ddot{u}_p + (D_2 + \Theta_2^T) \dot{u}_p + (D_1 + \Theta_1^T) u_p = D_1 u \label{eq:second_order_act}
 \end{equation}
-This change in dynamics means that the the structure of the model used for control design is no longer accurate, and the autonomous controller may lose stability and command tracking ability.
+where in addition to $\Theta_1$, $\Theta_2$ is an unknown parameter as well. This change in dynamics means that the the structure of the model used for control design is no longer accurate, and the autonomous controller may lose stability and command tracking ability. In particular, the challenge from the anomaly is the increase in relative degree between $u$ and $y_p$ from two to three.
 
 In addition to an autonomous controller which generates control input $u(t)$ in (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}), a human supervisor is tasked with the high-level operation of the plant (\ref{eq:plant_dynamics}), including mission and task planning (commanding its mode of operation) and monitoring to ensure safe and anomaly-free operation. In this chapter, we consider \textit{remote} human operators who cannot sense the vehicle state and dynamics directly through vestibular pathways. The human supervisor may be responsible for the supervision of multiple plant instances, as illustrated in Fig. \ref{fig:uav_supervisor} for the case of HALE VFA platforms. Operation is considered \textit{human-on-the-loop} in the same manner as the onboard human pilot considered in the problem of Chapter \ref{sec:siso_problem}. 
 
@@ -141,13 +141,13 @@ In addition to an autonomous controller which generates control input $u(t)$ in 
 	\label{fig:uav_supervisor}
 \end{figure}
 
-The remote human supervisor has information on plant sensor measurements, state estimate, tracking performance, and health (via visual, haptic, and/or auditory interfaces). \textit{Human-in-the-loop} operation is possible via remote controls, allowing the operator to actuate the plant by manually providing $u(t)$ in (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}). The sensing and actuation by the remote human supervisor include time delays $\tau_s, \tau_a > 0$, respectively.
+It is assumed that the human supervisor has access to information on plant sensor measurements, state estimate, tracking performance, and health (via visual, haptic, and/or auditory interfaces), and is able to perceive changes in plant dynamics, such as an increased lag or decreased control effectiveness, via these interfaces.  \textit{Human-in-the-loop} operation is possible via remote controls, allowing the operator to actuate the plant by manually providing $u(t)$ in (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}). The sensing and actuation by the remote human supervisor include time delays $\tau_s, \tau_a > 0$, respectively.
 
-The problem we investigate in Chapter \ref{ch:mimo_shared_ctrl} is whether we can use a  combination of 
+The problem we investigate in Chapter \ref{ch:mimo_shared_ctrl} is whether the design of $u(t)$ can be carried out using a shared decision-making and control architecture using
 \begin{enumerate}[label=(\alph*)]
 	\item autonomous control methodologies
 	\item a remote human supervisor
 \end{enumerate}
-  to successfully mitigate the anomalous dynamics (\ref{eq:second_order_act}) and restore tracking performance in the presence of uncertainty. 
+so as to lead to a successful mitigation of an abrupt anomaly causing a change from (\ref{eq:first_order_act}) to (\ref{eq:second_order_act}) and restore tracking performance in the presence of uncertainty.
   
 %  We refer to this class of anomaly response as a shared control response. This work builds on anomaly response frameworks using adaptive autopilots and on-board human pilots reported in \cite{farjadian2017bumpless} and \cite{thomsen2018shared}.

@@ -1,15 +1,38 @@
-\chapter{Tables}
+\chapter{Numerical Simulation Parameters} \label{app:params}
 
-\begin{table}
-\caption{Armadillos}
-\label{arm:table}
-\begin{center}
-\begin{tabular}{||l|l||}\hline
-Armadillos & are \\\hline
-our	   & friends \\\hline
-\end{tabular}
-\end{center}
-\end{table}
+\section{MIMO Output Feedback Adaptive Controller}
+\subsection{Nominal Adaptive Controller}
+\begin{align*} 
+	Q_{LQR} &= \text{diag}(0.001, \; 2.0, \; 0.001, \; 2.0, \; 200, \; 50, \; 0.001, \; 0.001, \; 10.0, \; 0.00025) \\
+	R_{LQR} &= 50 I_2 \\
+	\alpha_0 &= 1.0 \\
+	\alpha_1 &= 0.5 \\
+	\epsilon &= 20 \\
+%	\zeta_{cmd} &= 2.0 \\
+%	\omega_{cmd} &= 0.5 \\
+	\Gamma_m &= 400 I_3 \\
+	\Gamma_\Lambda &= \text{diag}(2000 I_2, \;0.2 I_{14})
+\end{align*}
+%                SO.Gamma.l = 2000*eye(num_input);
+%                SO.Gamma.p1 = 0.2*eye(num_state-num_input);
+%                SO.Gamma.p2 = 0.2*eye(num_state);
+%                SO.Gamma.p21 = 400*eye(num_output_i);
+
+\subsection{Recovery Adaptive Controller}
+\begin{align*}
+	Q_{LQR} &= \text{diag}(0.001, \; 2.0, \; 0.001, \; 2.0, \; 200, \; 50, \; 0.001, \; 0.001, \; 0.0001, \; 0.0001, \; 0.5, \; 0.00005) \\
+	R_{LQR} &= 50 I_2 \\
+	\alpha_0 &= 2.0 \\
+	\alpha_1 &= \sqrt{2.0} \\
+	\alpha_2 &= 1.0 \\
+	\epsilon &= 20 \\
+%	\zeta_{cmd} &= 2.0 \\
+%	\omega_{cmd} &= 0.5 \\
+	\Gamma_\Theta &= \text{diag}(2000 I_2, \;0.2 I_{14}) \\
+	\Gamma_\Psi &= \text{diag}(1000 I_6, \; 5000 I_2) \\
+	\mu &= 0.02
+\end{align*}
+
 
 \clearpage
 \newpage
