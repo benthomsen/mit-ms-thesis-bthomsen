@@ -41,7 +41,7 @@ figure('Position',[100, 100, 800, 250])
 plot(tsim, PSP.th1, 'LineWidth', 1.5); hold on; grid on;
 plot(tsim, PSP.th2, 'LineWidth', 1.5); plot(tsim(i_tsrm+1:end), PSP.th3, 'LineWidth', 1.5);
 plot(tsim, PSP.q, 'LineWidth', 1.5);
-ylim([-60 60])
+ylim([-50 50])
 line([ts ts],ylim,'Color',[0 0 0],'LineStyle','-.', 'LineWidth', 1);
 line([ts_rm ts_rm], ylim,'Color',[0 0 0],'LineStyle','-.', 'LineWidth', 1);
 ylabel('$\theta_i$', 'interpreter', 'latex')
@@ -108,8 +108,8 @@ qbar_t3       = mean(PSP.q(i31:end));
 s = tf('s');
 rm2 = 8/(s^2+6*s+8);
 rm3 = 32/((s^2+6*s+8)*(s+4));
-Y_cl_trans_1 = (0.5724*qbar_t2)/(s^3 + 2.90*s^2 + (1.98 - 0.5724*theta2_bar_t2)*s - 0.5724*theta1_bar_t2); % using thetas, q from end of adjustment phase
-Y_cl_3 = (0.5724*qbar_t3)/(s^3 + (2.90 - 0.5724*theta3_bar_t3)*s^2 + (1.98 - 0.5724*theta2_bar_t3)*s - 0.5724*theta1_bar_t3); % using thetas, q from end of adjustment phase
+Y_cl_trans_1 = (0.318*qbar_t2)/(s^3 + 2.10*s^2 + (1.10 - 0.318*theta2_bar_t2)*s - 0.318*theta1_bar_t2); % using thetas, q from end of adjustment phase
+Y_cl_3 = (0.318*qbar_t3)/(s^3 + (2.10 - 0.318*theta3_bar_t3)*s^2 + (1.10 - 0.318*theta2_bar_t3)*s - 0.318*theta1_bar_t3); % using thetas, q from end of adjustment phase
 % step(rm2, Y_cl_trans_1, Y_cl_3, rm3, 8); 
 [y1, t1] = step(rm2, 6);
 [y2, t2] = step(Y_cl_trans_1, 6); 
@@ -140,7 +140,7 @@ tightfig()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %% Anomalous Delay 
-clear; close all;
+% clear; close all;
 anom = AnomalyResponseSim('del',0);
 
 SP = anom.simPars;
@@ -163,14 +163,29 @@ set(0,'defaultAxesFontSize', 16);
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); 
 set(groot, 'defaultLegendInterpreter','latex');
 
+%% Calcs
+bp2 = 1.0;
+bm_3 = 32;
+ppole_1 = 0;
+ppole_2 = 1.10;
+ppole_3 = 1.0;
+
+lambda_3d = bp2/bm_3;
+q_0_3d = 1/lambda_3d
+theta_0_1_3d = ((ppole_1*ppole_2*ppole_3) - 32) / bp2;
+theta_0_2_3d = ((ppole_1*ppole_2 + ppole_1*ppole_3 + ppole_2*ppole_3) - 32) / bp2;
+theta_0_3_3d = ((ppole_1 + ppole_2 + ppole_3)) / bp2;
+Theta_0_3d = [theta_0_1_3d theta_0_2_3d theta_0_3_3d]
+
 %% Plot 1
 
 figure('Position',[100, 100, 800, 250])
-plot(tsim, PSP.r_deg, 'LineWidth', 1.5); hold on; grid on;
+% plot(tsim, PSP.r_deg, 'LineWidth', 1.5); hold on; grid on;
+plot(t_nom, r_nom, 'LineWidth', 1.5); hold on; grid on;
 plot(tsim, PSP.x_deg(1,:), 'LineWidth', 1.5, 'color', c2);
 ylim([-2 25])
 line([ts ts],ylim,'Color',[0 0 0],'LineStyle','-.', 'LineWidth', 1);
-line([ts_rm ts_rm], ylim,'Color',[0 0 0],'LineStyle','-.', 'LineWidth', 1);
+line([tsim(end) tsim(end)], ylim,'Color',[0 0 0],'LineStyle','-.', 'LineWidth', 1);
 ylabel('$\phi$ (deg)', 'interpreter', 'latex')
 xlabel('Time (s)')
 title('Bank Angle (deg)', 'interpreter', 'latex')

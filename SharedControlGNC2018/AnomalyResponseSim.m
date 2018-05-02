@@ -32,7 +32,7 @@ classdef AnomalyResponseSim < handle
             % ****** Parameters ****** 
             SP.tfin  = 180;   % simulation length (sec)
             SP.ts    = 30;    % plant dynamics switch time (anomaly)
-            SP.ts_rm = 90;    % controller switching time  (anomaly response)
+            SP.ts_rm = 180;    % controller switching time  (anomaly response)
             SP.dT    = 0.005; % fixed time step
 
             % 2D reference model dynamics
@@ -60,8 +60,8 @@ classdef AnomalyResponseSim < handle
             if contains(simMode, 'del')
                 SP.tau = 0.2;   % time delay added
             elseif contains(simMode, 'act')
-                bp2 = 1.8 * bp1; % DC plant gain after switch
-                ppole_3 = 1.8;
+                bp2 = 1.0 * bp1; % DC plant gain after switch
+                ppole_3 = 1.0;
                 SP.Bp_3 = [0; 0; bp2];
                 SP.Ap_3 = [0 1 0; 0 0 1; ...
                         -(ppole_1*ppole_2*ppole_3) -(ppole_1*ppole_2 + ppole_1*ppole_3 + ppole_2*ppole_3) -(ppole_1 + ppole_2 + ppole_3)];
@@ -139,6 +139,10 @@ classdef AnomalyResponseSim < handle
             % indices of relevant points in returned data
             PSP.i_ts   = ceil(ts/dT)+1;
             PSP.i_tsrm = ceil(ts_rm/dT)+1;
+            i_end = length(anom.controlSim.tout);
+            if (PSP.i_tsrm > i_end)
+                PSP.i_tsrm = i_end;
+            end
             i_tsrm = PSP.i_tsrm; % just for use here
             PSP.tsim   = anom.controlSim.tout;
             PSP.openLoopResponse = squeeze(anom.xmSim.xm_full_ol);
