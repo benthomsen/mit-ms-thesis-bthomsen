@@ -41,7 +41,7 @@ figure('Position',[100, 100, 800, 250])
 plot(tsim, PSP.th1, 'LineWidth', 1.5); hold on; grid on;
 plot(tsim, PSP.th2, 'LineWidth', 1.5); plot(tsim(i_tsrm+1:end), PSP.th3, 'LineWidth', 1.5);
 plot(tsim, PSP.q, 'LineWidth', 1.5);
-ylim([-40 40])
+ylim([-60 60])
 line([ts ts],ylim,'Color',[0 0 0],'LineStyle','-.', 'LineWidth', 1);
 line([ts_rm ts_rm], ylim,'Color',[0 0 0],'LineStyle','-.', 'LineWidth', 1);
 ylabel('$\theta_i$', 'interpreter', 'latex')
@@ -139,7 +139,7 @@ tightfig()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%% Anomalous Actuators 
+%% Anomalous Delay 
 clear; close all;
 anom = AnomalyResponseSim('del',0);
 

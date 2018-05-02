@@ -144,7 +144,7 @@ We design a feedforward/feedback control law of the form
 
 \end{tikzpicture}
 
-	\caption{Block diagram of model-reference adaptive controller with closed-loop reference model}
+	\caption{Block diagram of model reference adaptive controller with closed-loop reference model}
 	\label{fig:mrac_block}
 \end{figure}
 
@@ -203,8 +203,6 @@ Incorporating the human pilot in detection and decision-making tasks may allow t
 
 % TODO explain tasks like Ch 4, reword above
 
-% TODO "onboard" or "on-board" everywhere
-
 % The adaptive autopilot may be used simultaneously in detection, by alerting the pilot to potential anomalies and proposing diagnostic actions, such as a prescribed sequence of control inputs to probe the vehicle response. 
 
 \section{Overall Shared Controller}\label{sec:siso_sc_overall}
@@ -257,7 +255,6 @@ Incorporating the human pilot in detection and decision-making tasks may allow t
 	\label{fig:response_flow}
 \end{figure}
 
-% TODO change t_1^* etc. to t_1^*, t_2^* everywhere
 % TODO change Post-Anomaly, Post-Correction to same as Ch.5The shared control algorithm between the adaptive autopilot and human pilot that we propose is as follows. Under nominal operating conditions, the adaptive controller as in (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), and (\ref{eqn:qdot_projection}) is proposed. An anomaly is assumed to occur at $t=t_1^*$. 
 
 Following this time instant, the pilot detects the anomalous vehicle dynamics, and at $t=t_2^*$ indicates to the adaptive autopilot the perceived increase in order. Using this pilot input, we propose an adaptive controller predicated on a higher-order dynamics of the open-loop plant and assume that in addition to the plant output and its first time derivative, the second derivative of the plant output is available for feedback control. 

@@ -1,9 +1,9 @@
 % Simulations
 \chapter{Anomaly Response Simulations}  \label{ch:numerical}
-\section{SISO State Feedback and Onboard Pilot}
+\section{SISO State Feedback and On-Board Pilot}
 % TODO make sure notation here is consistent with earlier
 
-The shared control solution introduced in Chapter \ref{ch:siso_shared_ctrl} is applied to the problem introduced in Section \ref{sec:siso_problem}, using a simulation model of the lateral-directional dynamics of a fixed-wing aircraft and making assumptions about the perceptive capabilities and actions of an onboard human pilot. The aircraft model used in simulation is described in Section \ref{subsec:latdir_model}. The results of numerical simulations of the control of this plant and recovery from the two anomalies -- actuators whose dynamics change abruptly from a DC gain to first-order, and sensors whose measurements abruptly become time-delayed -- are presented in Sections \ref{subsec:siso_act_sims} and \ref{subsec:siso_delay_sims}, respectively.
+The shared control solution introduced in Chapter \ref{ch:siso_shared_ctrl} is applied to the problem introduced in Section \ref{sec:siso_problem}, using a simulation model of the lateral-directional dynamics of a fixed-wing aircraft and making assumptions about the perceptive capabilities and actions of an on-board human pilot. The aircraft model used in simulation is described in Section \ref{subsec:latdir_model}. The results of numerical simulations of the control of this plant and recovery from the two anomalies -- actuators whose dynamics change abruptly from a DC gain to first-order, and sensors whose measurements abruptly become time-delayed -- are presented in Sections \ref{subsec:siso_act_sims} and \ref{subsec:siso_delay_sims}, respectively.
 
 % TODO add comparisons to passive response for both
 \subsection{Aircraft Rolling Mode Dynamics} \label{subsec:latdir_model}
@@ -109,17 +109,14 @@ A closed-loop reference model, corresponding to (\ref{eqn:rm_2_symbolic}), is de
 \end{equation}
 \noindent for use with the nominal adaptive controller. The initial feedback and feedforward parameters used in simulation, $\theta(t=0)$ and $q(t=0)$, are chosen such that the matching conditions of (\ref{e:tstar}) and (\ref{e:qstar}) are met.
 
-The two cases of anomalies discussed in Sections \ref{subsec:siso_act_fault} and \ref{subsec:siso_delay}, of the introduction of actuator dynamics and a time delay, respectively, were simulated numerically in MATLAB/Simulink for bank angle tracking tasks. In these simulations, the commanded stability axis bank angle is a sequence of 5-second steps. In both of the examples, which are presented in Sections \ref{subsec:siso_act_sims} and \ref{subsec:siso_delay_sims}, the anomaly occurs at $t_1^* = 30$s, and the corrective action is applied to the controller at $t_2^* = 90$s. The stages of the two anomaly response simulations are defined as follows.
+The two cases of anomalies discussed in Sections \ref{subsec:siso_act_fault} and \ref{subsec:siso_delay}, of the introduction of actuator dynamics and a time delay, respectively, were simulated numerically in MATLAB/Simulink for bank angle tracking tasks. In these simulations, the commanded stability axis bank angle is a sequence of 5-second steps. In both of the examples, which are presented in Sections \ref{subsec:siso_act_sims} and \ref{subsec:siso_delay_sims}, the anomaly occurs at $t_1^* = 30$s, and the corrective action is applied to the controller at $t_2^* = 90$s. The two anomaly response (AR) simulations to be presented are summarized as follows.
 \begin{description}
-	\item[ANOM-1] Simulation of a shared control response to an anomaly which causes a plant with parametric uncertainties to abruptly undergo a change in actuator dynamics from direct gain to first-order lag
-	\item[ANOM-2] Simulation of a shared control response to an anomaly which introduces a time delay into the measurement of the state of a plant with parametric uncertainties
+	\item[Act-AR] Simulation of a shared control response to an anomaly which causes a plant with parametric uncertainties to abruptly undergo a change in actuator dynamics from direct gain to first-order lag
+	\item[Del-AR] Simulation of a shared control response to an anomaly which introduces a time delay into the measurement of the state of a plant with parametric uncertainties
 \end{description}
 
-
-
-% TODO fix step response plots with x-axis label cut off
 \subsection{Actuator Fault}\label{subsec:siso_act_sims}
-The first anomaly considered in simulation, corresponding to the problem stated in Section \ref{subsec:siso_act_fault}, is the abrupt occurrence of an actuator fault, which is assumed to change the actuator dynamics from a direct gain (\ref{eq:siso_plant_input_nom}) to a first-order lag (\ref{eqn:actuator_dynamics_symbolic}). By applying the change in dynamics defined in (\ref{eqn:actuator_dynamics_symbolic}), and choosing $T_l = 0.556$, the plant dynamics change from (\ref{eqn:siso_plant_nominal_num}) to
+The first anomaly considered in simulation (\textbf{Act-AR}), corresponding to the problem stated in Section \ref{subsec:siso_act_fault}, is the abrupt occurrence of an actuator fault, which is assumed to change the actuator dynamics from a direct gain (\ref{eq:siso_plant_input_nom}) to a first-order lag (\ref{eqn:actuator_dynamics_symbolic}). By applying the change in dynamics defined in (\ref{eqn:actuator_dynamics_symbolic}), and choosing $T_l = 0.556$, the plant dynamics change from (\ref{eqn:siso_plant_nominal_num}) to
 \begin{equation}
 	\underbrace{\begin{bmatrix}
 			\dot{\phi} \\ \dot{p} \\ \ddot{p}
@@ -185,21 +182,21 @@ The control gains which will cause the closed-loop roll response to match the de
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\columnwidth]{phi_pole_v2.pdf}
-	\caption{Command ($r$) and output ($\phi$): under nominal operation ($t \leq 30$ s), after the abrupt change in actuator dynamics ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
+	\caption{Act-AR simulation: Bank angle command ($r$) and output ($\phi$) under nominal operation ($t \leq t_1^*$), after change in actuator dynamics ($t_1^* < t \leq t_2^*$), and after a corrective action ($t > t_2^*$)}
 	\label{fig:command_and_output}
 \end{figure}
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\columnwidth]{theta_pole_v2.pdf}
-	\caption{Adaptive feedback gains for the same simulation example as in Figure \ref{fig:command_and_output}: under nominal operation ($t \leq 30$ s), after the abrupt change in actuator dynamics ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
+	\caption{Act-AR simulation: Adaptive feedback gains under nominal operation ($t \leq t_1^*$), after change in actuator dynamics ($t_1^* < t \leq t_2^*$), and after a corrective action ($t > t_2^*$)}
 	\label{fig:theta}
 \end{figure}
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\columnwidth]{e_pole_v2.pdf}
-	\caption{The tracking error $e$ for the same simulation example as in Figure \ref{fig:command_and_output}: under nominal operation ($t \leq 30$ s), after the abrupt change in actuator dynamics ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
+	\caption{Act-AR simulation: Tracking error $\|e\|$ under nominal operation ($t \leq t_1^*$), after change in actuator dynamics ($t_1^* < t \leq t_2^*$), and after a corrective action ($t > t_2^*$)}
 	\label{fig:error}
 \end{figure}
 
@@ -212,16 +209,15 @@ Taking average parameter values over time $\Delta t$ at the end of each stage of
 \end{align}
 with $\Delta t = 5$s, $t_f = [30, \quad 90, \quad 180]$ allows us to define a closed-loop frequency response which is representative of controller performance after parameter adaptation in each stage. Figure \ref{fig:step_pole} shows the closed-loop unit step input responses with $(\bar{\theta}_i, \bar{q}_i)$ for $i = [1, 2, 3]$ plotted alongside the ideal response during nominal operation, demonstrating how the characteristics of nominal operation are recovered with the adaptive controller with three feedback parameters.
 
-% TODO get rid of case (i) notation, replace with something like ANOM-1, ANOM-2
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\columnwidth]{step_pole_v2.pdf}
-	\caption{Unit step responses for closed-loop transfer functions at different stages of simulation in response to an actuator fault, demonstrating performance improvement after corrective action}
+	\caption{Act-AR analysis: Unit step responses for closed-loop transfer functions at different stages of simulation, demonstrating performance improvement after corrective action}
 	\label{fig:step_pole}
 \end{figure}
 
 \subsection{Time-Delayed Sensor Measurements}\label{subsec:siso_delay_sims}
-The second type of anomaly considered in simulation, corresponding to the problem stated in Section \ref{subsec:siso_delay}, is the abrupt introduction of a time delay to sensor measurements. A time delay of $\tau = 0.200$s is added to the plant (\ref{eqn:2nd_order_lateral}) between the state measurements and their use in control input computation as in (\ref{eqn:delay_diffeq}), so that
+The second type of anomaly considered in simulation (\textbf{Del-AR}), corresponding to the problem stated in Section \ref{subsec:siso_delay}, is the abrupt introduction of a time delay to sensor measurements. A time delay of $\tau = 0.200$s is added to the plant (\ref{eqn:2nd_order_lateral}) between the state measurements and their use in control input computation as in (\ref{eqn:delay_diffeq}), so that
 \begin{equation}
 	x_\sigma(t) = x_p(t - 0.20).
 \end{equation}
@@ -284,25 +280,25 @@ the feedback and feedforward gains which would give the desired closed-loop resp
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\columnwidth]{phi_delay_v2.pdf}
-	\caption{Command ($r$) and output ($\phi$): under nominal operation ($t \leq 30$ s), after the abrupt addition of a time delay ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
+	\caption{Del-AR simulation: Bank angle command ($r$) and output ($\phi$) under nominal operation ($t \leq t_1^*$), after abrupt addition of a time delay ($t_1^* < t \leq t_2^*$), and after a corrective action ($t > t_2^*$)}
 	\label{fig:command_and_output_d}
 \end{figure}
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\columnwidth]{theta_delay_v2.pdf}
-	\caption{Adaptive feedback gains for the same simulation example as in Figure \ref{fig:command_and_output_d}: under nominal operation ($t \leq 30$ s), after the abrupt addition of a time delay ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
+	\caption{Del-AR simulation: Adaptive feedback gains under nominal operation ($t \leq t_1^*$), after abrupt addition of a time delay ($t_1^* < t \leq t_2^*$), and after a corrective action ($t > t_2^*$)}
 	\label{fig:theta_d}
 \end{figure}
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\columnwidth]{e_delay_v2.pdf}
-	\caption{The tracking error $e$ for the same simulation example as in Figure \ref{fig:command_and_output_d}: under nominal operation ($t \leq 30$ s), after the abrupt addition of a time delay ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
+	\caption{Del-AR simulation: Tracking error $\|e\|$ under nominal operation ($t \leq t_1^*$), after abrupt addition of a time delay ($t_1^* < t \leq t_2^*$), and after a corrective action ($t > t_2^*$)}
 	\label{fig:error_d}
 \end{figure}
 
-The resulting responses of the shared controller are shown in Figures \ref{fig:command_and_output_d}, \ref{fig:theta_d}, and \ref{fig:error_d}. From these results, we see that the adaptive controller with two feedback parameters has trouble tracking the commanded bank angle after the introduction of an anomaly, but the addition of a third feedback parameter ($\hat{\dot{p}}$) and a corresponding increase in the dimension of the reference model allows the controller to recover a reasonable tracking performance. It is worth noting that the model-following error does not converge to zero even with the MRAC controller given by (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), (\ref{eqn:qdot_projection}), and (\ref{eqn:rm_3}), because of the time delay approximation. 
+The resulting responses of the shared controller are shown in Figures \ref{fig:command_and_output_d}, \ref{fig:theta_d}, and \ref{fig:error_d}. From these results, we see that the adaptive controller with two feedback parameters has trouble tracking the commanded bank angle after the introduction of an anomaly, but the addition of a third feedback parameter ($\hat{\dot{p}}$) and a corresponding increase in the dimension of the reference model allows the controller to recover a reasonable tracking performance. It is worth noting that the model-following error does not converge to zero even with the recovery adaptive controller given by (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), (\ref{eqn:qdot_projection}), and (\ref{eqn:rm_3}), because of the time delay approximation. 
 
 The transfer functions used to generate step response plots in Figure \ref{fig:step_delay} use (\ref{eqn:theta_bar}) and (\ref{eqn:q_bar}) for average parameter values. Although the step response characteristics of Post-Correction differ more from nominal operation compared to the case of a change in actuator dynamics, the closed-loop response of Post-Correction is significantly more satisfactory than Post-Anomaly.
 
@@ -310,7 +306,7 @@ The transfer functions used to generate step response plots in Figure \ref{fig:s
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\columnwidth]{step_delay_v2.pdf}
-	\caption{Unit step responses for closed-loop transfer functions at different stages of simulation of delayed sensor measurements, demonstrating performance improvement after corrective action}
+	\caption{Del-AR analysis: Unit step responses for closed-loop transfer functions at different stages of simulation, demonstrating performance improvement after corrective action}
 	\label{fig:step_delay}
 \end{figure}
 \clearpage
@@ -480,7 +476,6 @@ We begin by simulating the HALE VFA under nominal autonomous control, responding
 
 These simulations, presented in Figs. \ref{fig:nom1}, \ref{fig:nom2}, and \ref{fig:nom3} respectively, show how the adaptive controller with output feedback described in (\ref{eq:rd2-b1a})--(\ref{eq:rd2-adaptation}) is able to recover the desired closed-loop performance with uncertainty in plant and actuator parameters. With the baseline RSLQR controller only, the system suffers degraded command tracking performance in the presence of uncertainty (Fig. \ref{fig:nom2}), especially for vertical acceleration tracking.
 
-% TODO also show AR-LQR example
 In what follows, we simulate the introduction of an anomaly into the dynamics, causing the vehicle's actuators to change abruptly from the uncertain first-order dynamics (\ref{eq:first_order_act}) to the uncertain second-order dynamics (\ref{eq:second_order_act}) at $t_1^* = 600s$. We consider three responses to the anomaly.
 \begin{description}
 	\item[AR-1 (Passive)] The nominal adaptive autopilot retains control without intervention from the remote human supervisor

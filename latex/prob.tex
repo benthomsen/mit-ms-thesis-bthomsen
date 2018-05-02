@@ -1,11 +1,10 @@
 % Problem Statement
 \chapter{Problem Statement} \label{ch:problem}
 % TODO (finish) describing on high level the two problems
-% TODO move some details from MIMO into SISO
 
 This thesis will consider two variations in a control problem, as described in Sections \ref{sec:siso_problem} and \ref{sec:mimo_problem}, and addressed in Chapters \ref{ch:siso_shared_ctrl} and \ref{ch:mimo_shared_ctrl}, respectively.
 
-\section{Onboard Human Pilot and Full-State Feedback Adaptive Control} \label{sec:siso_problem}
+\section{On-Board Human Pilot and Full-State Feedback Adaptive Control} \label{sec:siso_problem}
 % TODO bring notation in line with MIMO example
 
 We consider single-input single-output (SISO) \textit{n}th-order linear dynamical plant models of the form 
@@ -24,25 +23,18 @@ Note that uncertainty in control effectiveness is captured by the uncertain matr
 
 In addition to an autonomous controller which generates control input $u(t)$ in (\ref{eq:siso_plant_input_nom}), a human operator (pilot) is tasked with the high-level operation of the plant (\ref{eq:siso_plant}), including monitoring to ensure safe and anomaly-free operation. Operation is thus \textit{human-on-the-loop} as opposed to \textit{human-in-the-loop}, as the pilot does not directly command actuator input. The pilot's perceptive capabilities (corresponding to the pathways in Fig. \ref{fig:sheridan_adapted}) include the sensing of $y_{D} \subseteq y$, $y_{H}$, and $r$, where $y_{D}$ is a subset of vehicle sensor measurements available to the pilot through cockpit displays, $y_{H}$ is the human pilot's sensing through visual and vestibular modalities, and $r$ is the prescribed command which the plant output should track. Note that in the single output case, $y_D \equiv y$.
 
-% TODO here and MIMO sec, change "no role in feedback control"
-
 %An adaptive autopilot based on model reference adaptive control (MRAC) is capable of addressing anomalies that can be represented as parametric uncertainties, but may perform poorly when an anomaly causes the order of the vehicle dynamics to change \cite{narendra2012stable, lavretsky2013robust}. A human pilot flying manually may detect such an anomaly and adapt to the anomalous dynamics, but the pilot's tracking performance may be noticeably poorer after a change in dynamics and pilot adaptation \cite{hess2015modeling, zaal2016manual}. 
 
-% TODO remove "case (x)" notation everywhere
 We consider the introduction of two severe anomalies in the dynamics of the plant model (\ref{eq:siso_plant}), described in Sections \ref{subsec:siso_act_fault} and \ref{subsec:siso_delay}. The first consists of a change in the actuator dynamics, represented as a change in the actuator model from a gain to a first-order lag. The second anomaly is a latency introduced in the feedback of state information to the control algorithms. 
-
-% TODO move paragraph on assumptions of what human pilot has access to here
 
 %The remote human supervisor has information on plant sensor measurements, state estimate, tracking performance, and health (via visual, haptic, and/or auditory interfaces). \textit{Human-in-the-loop} operation is possible via remote controls, allowing the operator to actuate the plant by manually providing $u(t)$ in (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}). The sensing and actuation by the remote human supervisor include time delays $\tau_s, \tau_a > 0$, respectively.
 
 The problem we investigate in Chapter \ref{ch:siso_shared_ctrl} is the design of $u(t)$ can be carried out using a shared decision-making and control architecture which leverages the merits of 
 \begin{enumerate}[label=(\alph*)]
 	\item autonomous control methodologies
-	\item an onboard human pilot
+	\item an on-board human pilot
 \end{enumerate}
 to successfully mitigate two types of anomalous dynamics to be described presently and restore tracking performance in the presence of uncertainty. We refer to this class of anomaly response as a shared control response. The following two subsections describe two specific problems which will be addressed using this shared controller in Chapter \ref{ch:siso_shared_ctrl}.
-
-% TODO probably remove self-citation in thesis?
 
 \subsection{Actuator Fault} \label{subsec:siso_act_fault}
 An anomaly is introduced which changes the actuator dynamics from a direct input (\ref{eq:siso_plant_input_nom}) to a first-order lag
@@ -132,7 +124,7 @@ Consider the occurrence of an anomaly which causes an abrupt change in actuator 
 \end{equation}
 where in addition to $\Theta_1$, $\Theta_2$ is an unknown parameter as well. This change in dynamics means that the the structure of the model used for control design is no longer accurate, and the autonomous controller may lose stability and command tracking ability. In particular, the challenge from the anomaly is the increase in relative degree between $u$ and $y_p$ from two to three.
 
-In addition to an autonomous controller which generates control input $u(t)$ in (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}), a human supervisor is tasked with the high-level operation of the plant (\ref{eq:plant_dynamics}), including mission and task planning (commanding its mode of operation) and monitoring to ensure safe and anomaly-free operation. In this chapter, we consider \textit{remote} human operators who cannot sense the vehicle state and dynamics directly through vestibular pathways. The human supervisor may be responsible for the supervision of multiple plant instances, as illustrated in Fig. \ref{fig:uav_supervisor} for the case of HALE VFA platforms. Operation is considered \textit{human-on-the-loop} in the same manner as the onboard human pilot considered in the problem of Chapter \ref{sec:siso_problem}. 
+In addition to an autonomous controller which generates control input $u(t)$ in (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}), a human supervisor is tasked with the high-level operation of the plant (\ref{eq:plant_dynamics}), including mission and task planning (commanding its mode of operation) and monitoring to ensure safe and anomaly-free operation. In this chapter, we consider \textit{remote} human operators who cannot sense the vehicle state and dynamics directly through vestibular pathways. The human supervisor may be responsible for the supervision of multiple plant instances, as illustrated in Fig. \ref{fig:uav_supervisor} for the case of HALE VFA platforms. Operation is considered \textit{human-on-the-loop} in the same manner as the on-board human pilot considered in the problem of Chapter \ref{sec:siso_problem}. 
 
 \begin{figure}[htbp]
 	\centering
