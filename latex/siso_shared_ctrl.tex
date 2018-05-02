@@ -1,15 +1,12 @@
 \chapter{Shared Control with Human Pilot and State Feedback} \label{ch:siso_shared_ctrl}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% TODO get rid of "case (x)" notation
-% TODO add a short overview of shared control solution here before autopilot
-
-In this chapter, we introduce a shared control architecture between human pilots and adaptive control algorithms to address the problems defined in Section \ref{sec:siso_problem}.
+In this chapter, we introduce a shared control architecture between human pilots and adaptive control algorithms to address the problems defined in Section \ref{sec:siso_problem}. Adaptive controllers can be designed to permit autonomous control of the vehicle (\ref{eq:siso_plant}) in the presence of parametric uncertainties in $A_p$ and $B_p$. On-board human pilots monitor the performance of the vehicle and are trained to manually control the vehicle in case of autopilot failure. Our shared anomaly response tasks the human pilot with providing key inputs based on higher-level perception of the anomaly, but delegates the low-level regulation and command tracking tasks to adaptive control algorithms which make use of these inputs. In Section \ref{sec:siso_sc_adaptive}, we describe two adaptive autopilot designs which in combination with the human operator whose precise role is described subsequently in Section \ref{sec:siso_sc_human}, will solve the problem which was presented in Section \ref{sec:siso_problem}. The overall shared control architecture is summarized in Section \ref{sec:siso_sc_overall}.
 
 \section{Adaptive Autopilot} \label{sec:siso_sc_adaptive}
-Central to this work is the use of an autopilot which employs advanced control principles for low-level flight control tasks in the place of human pilots. In particular, our autopilot design uses adaptive control with vehicle states available for feedback \cite{narendra2012stable}. Closed-loop reference models (CRMs) based on Ref.~\cite{gibson2013adaptive} are utilized here to improve the transient performance of adaptive control, in comparison to open-loop reference models.
+Central to this work is the use of an autopilot which employs advanced control principles for low-level flight control tasks in the place of human pilots. In particular, our autopilot design uses adaptive control with vehicle states available for feedback \cite{narendra2012stable}. Closed-loop reference models (CRMs) \cite{gibson2013adaptive} are utilized here to improve the transient performance of adaptive control, in comparison to open-loop reference models.
 
-In this section, a \textit{nominal} adaptive controller is defined for the \textit{n}th-order linear plant given in (\ref{eq:siso_plant}). A \textit{recovery} adaptive controller is then defined for the (\textit{n+1})th-order plant given in (\ref{eqn:plant_3_compact}).
+In this section, a \textit{nominal} adaptive controller is designed to allow tracking of commands for the \textit{n}th-order linear dynamical system given in (\ref{eq:siso_plant}). A \textit{recovery} adaptive controller is then designed for the (\textit{n+1})th-order system given in (\ref{eqn:plant_3_compact}) which arises following an anomaly that changes the system dynamics.
 
 \subsection{Nominal Adaptive Controller}
 We design a feedforward/feedback control law of the form
@@ -17,14 +14,12 @@ We design a feedforward/feedback control law of the form
 	u(t) = \theta(t) x_p(t) + q(t) r(t)
 	\label{eqn:control_law}
 \end{equation}
-\noindent where $\theta(t) \in \mathbb{R}^{1 \times n}$ and scalar $q(t)$ are adaptive gains on the plant states and reference input, $r(t)$, respectively.
-
-The reference model used in this adaptive controller is a dynamical system 
+\noindent where $\theta(t) \in \mathbb{R}^{1 \times n}$ and scalar $q(t)$ are adaptive gains on the plant states and reference input, $r(t)$, respectively. The design of an adaptive controller is based upon the dynamics of a reference model, a dynamical system given by
 \begin{equation}
 	\dot{x}_m(t) = A_m x_m(t) + B_m r(t) - L_m \left[x_p(t) - x_m(t)\right]
 	\label{eqn:crm}
 \end{equation} % TODO \lambda for matching conds could be a diagonal matrix, no?
-\noindent where $A_m \in \mathbb{R}^{n \times n}$ is Hurwitz, $B_m \in \mathbb{R}^{n \times 1}$, $L_m \in \mathbb{R}^{n \times n}$, and $e(t) \equiv x_p(t) - x_m(t)$ defined as the state error. It is assumed that there exists scalar $\lambda$ such that $B_p \equiv \lambda B_m$. In this form, an appropriate choice of $L_m$, such as (\ref{eqn:L_m}), ensures that there exists matrix $P = P^T > 0$, the solution to the Lyapunov equation $(A_m + L_m)^T P + P(A_m + L_m) = - Q$, for arbitrary $Q = Q^T > 0$. Feedback and feedforward control gain adaptation is given by
+\noindent where $A_m \in \mathbb{R}^{n \times n}$ is Hurwitz, $B_m \in \mathbb{R}^{n \times 1}$, $L_m \in \mathbb{R}^{n \times n}$, and $e(t) \equiv x_p(t) - x_m(t)$ defined as the state error. It is assumed that there exists scalar $\lambda$ such that $B_p \equiv \lambda B_m$. The matrix $A_m$ can be designed using techniques such as LQR (i.e. $A_m = A_p + B_p K_{lqr}$) to model a desired closed-loop system dynamic response. In this form, an appropriate choice of $L_m$, such as (\ref{eqn:L_m}), ensures that there exists matrix $P = P^T > 0$, the solution to the Lyapunov equation $(A_m + L_m)^T P + P(A_m + L_m) = - Q$, for arbitrary $Q = Q^T > 0$. Feedback and feedforward control gain adaptation is given by the adaptive laws
 \begin{eqnarray}
 	\dot{\theta}(t) &=& - \Gamma_\theta B_m^T P e(t) x_p^T(t) \label{eqn:adaptive_law_theta}\\
 	\dot{q}(t) &=& - \gamma_q B_m^T P e(t) r(t)
@@ -175,24 +170,44 @@ To ensure robustness of the adaptive controller, a projection operator \cite{pom
 	f(\varphi) = \frac{\varphi^2 - \varphi_{m}^2}{2 \varphi_{\epsilon} \varphi_{m} + \varphi_{\epsilon}^2}
 	\label{eqn:proj_function}
 \end{equation}
-\noindent where $\varphi_{m}$ and $(\varphi_{m} + \varphi_{\epsilon})$ define ``soft'' and ``hard'' bounds on the parameter $\varphi$, respectively.
+\noindent where $\varphi_{m}$ and $(\varphi_{m} + \varphi_{\epsilon})$ define ``soft'' and ``hard'' bounds on the parameter $\varphi$, respectively. With a plant given by (\ref{eq:siso_plant}), a control law defined as in (\ref{eqn:control_law}), a reference model as in (\ref{eqn:crm}), and parameter adaptation as in (\ref{eqn:thetadot_projection}) and (\ref{eqn:qdot_projection}), the goal of command tracking in the presence of parametric uncertainties is achieved. Section \ref{subsec:siso_recovery_ac} introduces the adaptive control portion of the shared control response to the anomalies described in Chapter \ref{sec:siso_problem}.
 
-\subsection{Recovery Adaptive Controller}
-The \textit{recovery} adaptive controller here uses a control design similar to the \textit{nominal} adaptive controller described above, however it is designed based on a higher-order model of the plant. In order to satisfy the matching conditions for adaptive control given in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}), a corresponding higher-order reference model, accommodating additional state information, must be designed.
-
+\subsection{Recovery Adaptive Controller} \label{subsec:siso_recovery_ac}
+The \textit{recovery} adaptive controller here is designed using theory identical to that of the \textit{nominal} adaptive controller described above, however it is designed based on a higher-order model of the plant. In order to satisfy the matching conditions for adaptive control given in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}), a corresponding higher-order reference model, accommodating additional state information, must be designed. The control law has the form
+\begin{equation}
+	u(t) = \theta(t) x_p'(t) + q(t) r(t)
+	\label{eqn:control_law_3}
+\end{equation}
+where $x_p'$ is the state of the plant augmented with first-order actuator dynamics, as in (\ref{eqn:plant_3_symbolic}). The closed-loop reference model is then given by
+\begin{equation}
+	\dot{x}_m'(t) = A_m' x_m'(t) + B_m' r(t) - L_m' \left[x_p'(t) - x_m'(t)\right].
+	\label{eqn:crm_3}
+\end{equation}
+With a plant given by (\ref{eqn:plant_3_symbolic}), a control law defined as in (\ref{eqn:control_law_3}), a reference model as in (\ref{eqn:crm_3}), and parameter adaptation designed identically to (\ref{eqn:thetadot_projection}) and (\ref{eqn:qdot_projection}) in the augmented state space, command tracking in the presence of parametric uncertainties is achieved for the plant with first-order actuator dynamics. 
 % TODO finish describing n+1th order controller
 
 \section{Human Pilot} \label{sec:siso_sc_human}
 % TODO make this similar to role of remote human operator
-Trained human pilots develop mental models of the vehicle response and expected performance in different situations, giving these pilots a high level of situation awareness regarding the aircraft \cite{endsley1995toward}. Even when a human pilot is not controlling the vehicle, anomalous vehicle behavior would be manifested through changes in the closed-loop response of the vehicle and its disturbance-rejection abilities. Additionally, when the cockpit controls used in manual control are physically actuated during autopilot operation, the pilot may be able perceive the autopilot's control actions through kinesthetic or tactile feedback \cite{tan1994human, yang2007development}. In combination with the pilot's visual and vestibular sensing of vehicle dynamics, this sensing of autopilot control actions will allow the human pilot to determine the open-loop vehicle response and perceive anomalous behavior. We therefore hypothesize that an on-board human pilot has the sensory and perceptive capabilities to detect and diagnose anomalies such as those described above. 
+The role of the human pilot in the shared controller is described as follows, as a sequence of responsibilities.
+\begin{enumerate}[label=Task \arabic*., leftmargin=1.8cm]
+	\item Timely detection of anomalous closed-loop dynamical behavior
+	\item Characterization of anomaly
+	\item Commanding a change from nominal autopilot to recovery autopilot
+\end{enumerate}
 
-In addition to changes in closed-loop behavior in both anomalies introduced in Section \ref{sec:siso_problem}, the physical actuator fault would change the relationship between $u$ and $\delta_a$, while the time-delayed sensor measurements would change the relationship between $y_{H}$ and $y_{D}$, in addition to the closed-loop vehicle dynamics. We hypothesize that incorporating the human pilot in detection and decision-making tasks may allow the autopilot to retain autonomous control in applications where autonomous decision-making based purely on autonomous anomaly detection and diagnosis is infeasible due to reliability concerns, for example. 
+Trained human pilots develop mental models of the vehicle response and expected performance in different situations, giving these pilots a high level of situation awareness regarding the aircraft \cite{endsley1995toward}. Even when a human pilot is not controlling the vehicle, anomalous vehicle behavior would be manifested through changes in the closed-loop response of the vehicle and its disturbance-rejection abilities. Additionally, when the cockpit controls used in manual control are physically actuated during autopilot operation, the pilot may be able perceive the autopilot's control actions through kinesthetic or tactile feedback \cite{tan1994human, yang2007development}. In combination with the pilot's visual and vestibular sensing of vehicle dynamics, this sensing of autopilot control actions will allow the human pilot to determine the open-loop vehicle response and perceive anomalous behavior. 
+
+In addition to changes in closed-loop behavior in both anomalies introduced in Section \ref{sec:siso_problem}, the physical actuator fault would change the relationship between $u$ and $\delta_a$, while the time-delayed sensor measurements would change the relationship between $y_{H}$ and $y_{D}$, in addition to the closed-loop vehicle dynamics. We therefore hypothesize that an on-board human pilot has the sensory and perceptive capabilities necessary to carry out Tasks (1) and (2) in the presence of the anomalies described in Section \ref{sec:siso_problem}. 
+
+Incorporating the human pilot in detection and decision-making tasks may allow the autopilot to retain autonomous control in applications where autonomous decision-making based purely on autonomous anomaly detection and diagnosis is infeasible due to reliability concerns, for example. 
+
+% TODO explain tasks like Ch 4, reword above
 
 % TODO "onboard" or "on-board" everywhere
 
 % The adaptive autopilot may be used simultaneously in detection, by alerting the pilot to potential anomalies and proposing diagnostic actions, such as a prescribed sequence of control inputs to probe the vehicle response. 
 
-\section{The Overall Shared Controller}\label{sec:siso_sc_overall}
+\section{Overall Shared Controller}\label{sec:siso_sc_overall}
 \begin{figure}[h]
 	\centering
 	
@@ -242,17 +257,17 @@ In addition to changes in closed-loop behavior in both anomalies introduced in S
 	\label{fig:response_flow}
 \end{figure}
 
-% TODO change t_{s,p} etc. to t_1^*, t_2^* everywhere
-% TODO change Post-Anomaly, Post-Correction to same as Ch.5The shared control algorithm between the adaptive autopilot and human pilot that we propose is as follows. At time $t=0$, the adaptive controller as in (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), and (\ref{eqn:qdot_projection}) is proposed, where the state $x_p$ is given as in (\ref{eqn:2nd_order_lateral}). An anomaly is assumed to occur at $t=t_{s,p}$. 
+% TODO change t_1^* etc. to t_1^*, t_2^* everywhere
+% TODO change Post-Anomaly, Post-Correction to same as Ch.5The shared control algorithm between the adaptive autopilot and human pilot that we propose is as follows. Under nominal operating conditions, the adaptive controller as in (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), and (\ref{eqn:qdot_projection}) is proposed. An anomaly is assumed to occur at $t=t_1^*$. 
 
-Following this time instant, the pilot detects the anomalous vehicle dynamics, and at $t=t_{s,c}$ indicates to the adaptive autopilot the perceived increase in order. Using this pilot input, we propose an adaptive controller predicated on a higher-order dynamics of the open-loop plant and assume that in addition to the plant output and its first time derivative, the second derivative of the plant output is available for feedback control. 
+Following this time instant, the pilot detects the anomalous vehicle dynamics, and at $t=t_2^*$ indicates to the adaptive autopilot the perceived increase in order. Using this pilot input, we propose an adaptive controller predicated on a higher-order dynamics of the open-loop plant and assume that in addition to the plant output and its first time derivative, the second derivative of the plant output is available for feedback control. 
 
-The time interval $[t_{s,p}, \quad t_{s,c}]$ is indicated as Post-Anomaly and the interval $t \geq t_{s,c}$ is indicated as Post-Correction. For the case of an actuator anomaly as in (\ref{eqn:actuator_dynamics_symbolic}), $\theta^* \in \mathbb{R}^3$ and $q^*$ exist that solve the corresponding matching conditions in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}), and an adaptive controller as in (\ref{eqn:thetadot_projection}) and (\ref{eqn:qdot_projection}) can be realized to lead to a stable closed-loop solutions and accurate tracking. These matching conditions are not met, however, in the case of the anomaly causing time-delayed sensor measurements (\ref{eqn:delay_approx_diffeq}). In the numerical examples, we will discuss the details of how such an adaptive controller with an increase in dimension following the pilot input performs for both cases of anomalies. 
+The time interval $[t_1^*, \quad t_2^*]$ is indicated as Post-Anomaly and the interval $t \geq t_2^*$ is indicated as Post-Correction. For the case of an actuator anomaly as in (\ref{eqn:actuator_dynamics_symbolic}), $\theta^* \in \mathbb{R}^3$ and $q^*$ exist that solve the corresponding matching conditions in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}), and an adaptive controller as in (\ref{eqn:thetadot_projection}) and (\ref{eqn:qdot_projection}) can be realized to lead to a stable closed-loop solutions and accurate tracking. These matching conditions are not met, however, in the case of the anomaly causing time-delayed sensor measurements (\ref{eqn:delay_diffeq}). In the numerical examples, we will discuss the details of how such an adaptive controller with an increase in dimension following the pilot input performs for both cases of anomalies. 
 A detailed discussion of the stability of the resulting adaptive controller is not carried out in this thesis. But it is clear that if the Post-Anomaly phase is sufficiently short, the adaptive controller will guarantee boundedness of the closed-loop system and convergence of $e(t)$ to zero if our assumptions that the cause of the two anomalies results in an $(n+1)$-order plant and that its states are measurable are satisfied. We carry out a detailed simulation study in the following section and evaluate the performance of the shared controller proposed above.
 
 \begin{comment}
 
-Following this time instant, the pilot detects the anomalous vehicle dynamics, and at $t=t_{s,c}$ indicates to the adaptive autopilot the perceived increase in order. Using this pilot input, we propose an adaptive controller predicated on a third-order dynamics of the open-loop plant and assume that in addition to the bank angle and roll rate, angular acceleration $\dot{p}$ is also measurable. We choose a reference model as
+Following this time instant, the pilot detects the anomalous vehicle dynamics, and at $t=t_2^*$ indicates to the adaptive autopilot the perceived increase in order. Using this pilot input, we propose an adaptive controller predicated on a third-order dynamics of the open-loop plant and assume that in addition to the bank angle and roll rate, angular acceleration $\dot{p}$ is also measurable. We choose a reference model as
 \begin{equation}
 	\underbrace{\begin{bmatrix}
 		\dot{\phi}_d \\ \dot{p}_d \\ \ddot{p}_d
@@ -266,7 +281,7 @@ Following this time instant, the pilot detects the anomalous vehicle dynamics, a
 	\label{eqn:rm_3_symbolic}
 \end{equation}
 
-The time interval $[t_{s,p}, \quad t_{s,c}]$ is indicated as Post-Anomaly and the interval $t \geq t_{s,c}$ is indicated as Post-Correction. For case (i), $\theta^* \in \mathbb{R}^3$ and $q^*$ exist that solve the corresponding matching conditions in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}), and an adaptive controller as in (\ref{eqn:thetadot_projection}) and (\ref{eqn:qdot_projection}) can be realized to lead to a stable closed-loop solutions and accurate tracking. These matching conditions are not met, however, in case (ii). In the numerical examples, we will discuss the details of how such an adaptive controller with an increase in dimension following the pilot input performs for both cases of anomalies. 
+The time interval $[t_1^*, \quad t_2^*]$ is indicated as Post-Anomaly and the interval $t \geq t_2^*$ is indicated as Post-Correction. For case (i), $\theta^* \in \mathbb{R}^3$ and $q^*$ exist that solve the corresponding matching conditions in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}), and an adaptive controller as in (\ref{eqn:thetadot_projection}) and (\ref{eqn:qdot_projection}) can be realized to lead to a stable closed-loop solutions and accurate tracking. These matching conditions are not met, however, in case (ii). In the numerical examples, we will discuss the details of how such an adaptive controller with an increase in dimension following the pilot input performs for both cases of anomalies. 
 A detailed discussion of the stability of the resulting adaptive controller is not carried out in this thesis. But it is clear that if the Post-Anomaly phase is sufficiently short, the adaptive controller will guarantee boundedness of the closed-loop system and convergence of $e(t)$ to zero if our assumptions that the cause of the two anomalies results in a third-order plant and that its states are measurable are satisfied. We carry out a detailed simulation study in the following section and evaluate the performance of the shared controller proposed above.
 \end{comment}
 

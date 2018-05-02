@@ -3,25 +3,44 @@
 \section{SISO State Feedback and Onboard Pilot}
 % TODO make sure notation here is consistent with earlier
 
-\subsection{Aircraft Rolling Mode Dynamics}
-As the specifics of our shared decision-making and control architecture are highly application dependent, in this chapter we will focus on the lateral-directional dynamics of a fixed-wing aircraft, which are described briefly. Chapter \ref{ch:mimo_shared_ctrl} will present the architecture in a more general form. For an aircraft trimmed in straight and level flight with equilibrium speed $u_0$ and pitch angle $\theta_0$, and assuming small perturbations about the equilibrium point, the lateral-directional dynamics of the aircraft can be linearized to the form $\dot{x}_{\mathrm{lat}} = A_{\mathrm{lat}} x_{\mathrm{lat}} + B_{\mathrm{lat}} u_{\mathrm{lat}}$ where
-\begin{eqnarray}
-	x_{\mathrm{lat}} &=& \begin{bmatrix}\beta & p_s & \phi_s & r_s \end{bmatrix}^T, \qquad u_{\mathrm{lat}} = \begin{bmatrix}\delta_r & \delta_a \end{bmatrix}^T \nonumber \\
-	A_{\mathrm{lat}} &=& \begin{bmatrix}
-			\frac{Y_\beta}{u_0} & \frac{Y_p}{u_0} & \frac{g_0\cos{\theta_0}}{u_0} & \frac{Y_r}{u_0} - 1 \\
-			L_\beta & L_p & 0 & L_r \\
-			0 & 1 & 0 & 0 \\
-			N_\beta & N_p & 0 & N_r
-		\end{bmatrix}, \qquad B_{\mathrm{lat}} = \begin{bmatrix}
-			\frac{Y_{\delta_r}}{u_0} & \frac{Y_{\delta_a}}{u_0} \\
-			L_{\delta_r} & L_{\delta_a} \\
-			0 & 0 \\
-			N_{\delta_r} & N_{\delta_a} 
-		\end{bmatrix}
-\end{eqnarray}
-\noindent with definitions of the stability and control derivatives in matrices $A_{\mathrm{lat}}$ and $B_{\mathrm{lat}}$ skipped for brevity (see Ref.~\cite{lavretsky2013robust} for more details). The states correspond to sideslip angle, stability axis roll rate, stability axis bank angle, and stability axis yaw rate, respectively, while the control inputs correspond to rudder and aileron deflections.
+The shared control solution introduced in Chapter \ref{ch:siso_shared_ctrl} is applied to the problem introduced in Section \ref{sec:siso_problem}, using a simulation model of the lateral-directional dynamics of a fixed-wing aircraft and making assumptions about the perceptive capabilities and actions of an onboard human pilot. The aircraft model used in simulation is described in Section \ref{subsec:latdir_model}. The results of numerical simulations of the control of this plant and recovery from the two anomalies -- actuators whose dynamics change abruptly from a DC gain to first-order, and sensors whose measurements abruptly become time-delayed -- are presented in Sections \ref{subsec:siso_act_sims} and \ref{subsec:siso_delay_sims}, respectively.
 
-Approximate second-order linearized rolling mode dynamics are extracted from this fourth-order system, and this system is given by
+% TODO add comparisons to passive response for both
+\subsection{Aircraft Rolling Mode Dynamics} \label{subsec:latdir_model}
+This section describes the lateral-directional dynamics of a fixed-wing aircraft. For an aircraft in steady wings-level flight with equilibrium speed $V_0$, pitch angle $\theta_0$, and no sideslip ($\beta_0 = 0$), and assuming small perturbations about the equilibrium point, the lateral-directional dynamics of the aircraft can be decoupled from the longitudinal aircraft dynamics, and linearized as follows \cite{stevens2015aircraft}:
+%\begin{eqnarray}
+%	x_{\mathrm{lat}} &=& \begin{bmatrix}\beta & \phi_s & p_s & r_s \end{bmatrix}^T, \qquad u_{\mathrm{lat}} = \begin{bmatrix}\delta_a & \delta_r \end{bmatrix}^T \nonumber \\
+%	A_{\mathrm{lat}} &=& \begin{bmatrix}
+%			\frac{Y_\beta}{V_0} & \frac{g_D\cos{\theta_0}}{V_0} & \frac{Y_p}{V_0} & \frac{Y_r}{V_0} - 1 \\
+%			0 & 0 & \frac{1}{\cos{\theta_0}} & 0 \\
+%			L_\beta & 0 & L_p & L_r \\
+%			N_\beta & 0 & N_p & N_r
+%		\end{bmatrix}, \qquad B_{\mathrm{lat}} = \begin{bmatrix}
+%			\frac{Y_{\delta_a}}{V_0} & \frac{Y_{\delta_r}}{V_0} \\
+%			0 & 0 \\
+%			L_{\delta_a} & L_{\delta_r} \\
+%			N_{\delta_a} & N_{\delta_r} 
+%		\end{bmatrix}
+%\end{eqnarray}
+\begin{equation}
+	\underbrace{\begin{bmatrix}\dot \beta \\ \dot \phi_s \\ \dot p_s \\ \dot r_s \end{bmatrix}}_{\dot{x}_{\mathrm{lat}}} = \underbrace{\begin{bmatrix}
+			\frac{Y_\beta}{V_0} & \frac{g_D\cos{\theta_0}}{V_0} & \frac{Y_p}{V_0} & \frac{Y_r}{V_0} - 1 \\
+			0 & 0 & \frac{1}{\cos{\theta_0}} & 0 \\
+			L_\beta & 0 & L_p & L_r \\
+			N_\beta & 0 & N_p & N_r
+		\end{bmatrix}}_{A_{\mathrm{lat}}}
+		\underbrace{\begin{bmatrix} \beta \\ \phi_s \\ p_s \\ r_s \end{bmatrix}}_{\dot{x}_{\mathrm{lat}}} + 
+		\underbrace{\begin{bmatrix}
+			\frac{Y_{\delta_a}}{V_0} & \frac{Y_{\delta_r}}{V_0} \\
+			0 & 0 \\
+			L_{\delta_a} & L_{\delta_r} \\
+			N_{\delta_a} & N_{\delta_r} 
+		\end{bmatrix}}_{B_{\mathrm{lat}}} 
+		\underbrace{\begin{bmatrix}\delta_a \\ \delta_r \end{bmatrix}}_{u_{\mathrm{lat}}}
+\end{equation}
+\noindent where derivations of the stability and control derivatives in matrices $A_{\mathrm{lat}}$ and $B_{\mathrm{lat}}$ can be found in other references (see Refs.~\cite{stevens2015aircraft} or \cite{lavretsky2013robust} for more details). The states correspond to sideslip angle, stability axis bank angle, stability axis roll rate, and stability axis yaw rate, respectively, while the control inputs correspond to aileron and rudder deflections.
+
+Based on time-scale separation, second-order dynamics of aileron-to-roll-angle are extracted from this fourth-order system and denoted here as the rolling mode dynamics, given by
 \begin{equation}
 	\underbrace{\begin{bmatrix}
 			\dot{\phi} \\ \dot{p}
@@ -31,14 +50,15 @@ Approximate second-order linearized rolling mode dynamics are extracted from thi
 			\phi \\ p
 		\end{bmatrix}}_{x_p} + \underbrace{\begin{bmatrix}
 			0 \\ L_{\delta_a}
-		\end{bmatrix}}_{B_p} \underbrace{\delta_a}_{u_p}
+		\end{bmatrix}}_{B_p} \underbrace{\delta_a}_{u_p}.
 	\label{eqn:2nd_order_lateral}
-\end{equation} \noindent with an open-loop transfer function
+\end{equation}
+This system corresponds to the plant as in (\ref{eq:siso_plant}), and it is noted that the rolling mode dynamics has the following transfer function in the Laplace frequency domain:
 \begin{equation}
-		\frac{\Phi(s)}{\Delta_a(s)} = \frac{L_{\delta_a}}{s^2 - L_p s}
+		\frac{\Phi(s)}{\Delta_a(s)} = \frac{L_{\delta_a}}{s^2 - L_p s}.
 \end{equation}
 
-In these equations, $\delta_a$ represents aileron input, and $\phi$ and $p$ denote the aircraft bank angle and roll rate in stability axes, with the subscript $(\cdot)_s$ dropped for notational simplicity. It is assumed that the states ($x_p$) are fully available for feedback (directly from sensors for $p$, and via integration of $p$ for $\phi$). $L_p$ is the roll damping derivative and $L_{\delta_a}$ is the rolling moment due to aileron deflection. We consider scenarios in which these parameters may be unknown, but are addressed in normal operation by an MRAC-based adaptive autopilot. The system has been simplified by fixing $\delta_r(t) = 0$ (no rudder input), so that aileron deflection is the only input. In normal operation, we assume the vehicle has sufficiently fast actuators, so that $\delta_a(t) = u(t)$ and equivalently $\Delta_a(s) = U(s)$, where $u(t)$ is the control signal. 
+In these equations, $\delta_a$ represents aileron input, and $\phi$ and $p$ denote the aircraft bank angle and roll rate in stability axes, with the subscript $(\cdot)_s$ dropped for notational simplicity. It is assumed that the states ($x_p$) are fully available for feedback (directly from sensors for $p$, and via integration of $p$ for $\phi$). $L_p$ is the roll damping derivative and $L_{\delta_a}$ is the rolling moment due to aileron deflection. We consider scenarios in which these parameters may be unknown, but are addressed in normal operation by an adaptive autopilot. The system has been simplified by fixing $\delta_r(t) = 0$ (no rudder input), so that aileron deflection is the only input. In normal operation, we assume the vehicle has sufficiently fast actuators, so that $\delta_a(t) = u(t)$ and equivalently $\Delta_a(s) = U(s)$, where $u(t)$ is the control signal. 
 
 Under nominal vehicle operation with the plant given by (\ref{eqn:2nd_order_lateral}), a second-order reference model corresponding to (\ref{eqn:crm}) is used
 \begin{equation}
@@ -53,29 +73,30 @@ Under nominal vehicle operation with the plant given by (\ref{eqn:2nd_order_late
 	\end{bmatrix}}_{B_m} r(t) - L_m e(t)
 	\label{eqn:rm_2_symbolic}
 \end{equation}
-\noindent where $x_m(t)$ is a vector of the desired states and $r(t)$ is the commanded bank angle. It is straightforward to see that a choice of
+\noindent where $x_m(t)$ is a vector of the desired states, $e(t) = x_p(t) - x_m(t)$ is the model-following error, and $r(t)$ is the commanded bank angle. It is straightforward to see that a choice of
 \begin{eqnarray}
 	\theta^* &=& \left[ \frac{-a_{m,1}}{L_{\delta_a}} \quad \frac{-a_{m,2}-L_p}{L_{\delta_a}} \right] \label{e:tstar}\\
 	q^* &=& \frac{b_{m,2}}{L_{\delta_a}} \label{e:qstar}
 \end{eqnarray} 
 \noindent solves the matching condition in (\ref{eqn:matchcond1}) and (\ref{eqn:matchcond2}). This in turn implies that even if the roll damping derivative ($L_p$) and the rolling moment due to aileron deflection ($L_{\delta_a}$) are unknown, the adaptive controller in (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), and (\ref{eqn:qdot_projection}) will be able to vary the feedback and feedforward gains such that the closed-loop response of the system is satisfactory. We shall denote such a case as nominal operation, and consider the anomalous cases as those where in addition to parametric uncertainties, changes in dynamics as described in Sections \ref{subsec:siso_act_fault} and \ref{subsec:siso_delay} occur.
 
-The two cases discussed above, of the introduction of actuator dynamics and a time delay, respectively, were simulated numerically in MATLAB/Simulink for bank angle tracking tasks. In these simulations, the commanded stability axis bank angle is a sequence of 5-second steps. In both of the examples presented here, the anomaly occurs at $t_{s,p} = 30$s, and the corrective action is applied to the controller at $t_{s,c} = 90$s.
-
 % TODO make sure notation here is consistent with earlier
-Numerical data for the Boeing 747 flying straight-and-level at Mach 0.25 at sea level \cite{heffley1972aircraft} was substituted into (\ref{eqn:2nd_order_lateral}) to constitute the following nominal plant dynamics, beginning at time $t = 0$
+Numerical data for the Boeing 747 flying straight-and-level at Mach 0.25 at sea level \cite{heffley1972aircraft} was substituted into (\ref{eqn:2nd_order_lateral}) to constitute the following nominal plant dynamics,
 \begin{equation}
-		\dot{x}_p = \begin{bmatrix}
+		\underbrace{\begin{bmatrix}
+			\dot{\phi} \\ \dot{p}
+		\end{bmatrix}}_{\dot{x}_p} = \underbrace{\begin{bmatrix}
 			0 & \hfil 1 \\ 0 & -1.10
-		\end{bmatrix} x_p + \begin{bmatrix}
+		\end{bmatrix}}_{A_p} \underbrace{\begin{bmatrix}
+			\phi \\ p
+		\end{bmatrix}}_{x_p} + \underbrace{\begin{bmatrix}
 			0 \\ 0.318
-		\end{bmatrix} \delta_a
-\end{equation} \noindent which resulted in the open-loop transfer function 
+		\end{bmatrix}}_{B_p} \delta_a \label{eqn:siso_plant_nominal_num}
+\end{equation} \noindent which results in the open-loop transfer function 
 \begin{equation}
-		\frac{\Phi(s)}{\Delta_a(s)} = \frac{0.318}{s^2 + 1.10s}
+		\frac{\Phi(s)}{\Delta_a(s)} = \frac{0.318}{s^2 + 1.10s}. 
 \end{equation}
-
-A reference model was chosen as in (\ref{eqn:rm_2_symbolic}) given by
+A closed-loop reference model, corresponding to (\ref{eqn:rm_2_symbolic}), is designed with the following numerical values
 \begin{equation}
 	\dot{x}_m = \underbrace{\begin{bmatrix}
 		\hfil 0 & \hfil 1\\ -8 & -6
@@ -86,22 +107,34 @@ A reference model was chosen as in (\ref{eqn:rm_2_symbolic}) given by
 	\end{bmatrix}}_{L_m} e
 	\label{eqn:rm_2}
 \end{equation}
-\noindent for the first (``nominal'' and ``post-anomaly'') stages of simulation. The initial feedback and feedforward parameters $\theta(t=0)$ and $q(t=0)$ are chosen such that the matching conditions of (\ref{e:tstar}) and (\ref{e:qstar}) are met.
+\noindent for use with the nominal adaptive controller. The initial feedback and feedforward parameters used in simulation, $\theta(t=0)$ and $q(t=0)$, are chosen such that the matching conditions of (\ref{e:tstar}) and (\ref{e:qstar}) are met.
+
+The two cases of anomalies discussed in Sections \ref{subsec:siso_act_fault} and \ref{subsec:siso_delay}, of the introduction of actuator dynamics and a time delay, respectively, were simulated numerically in MATLAB/Simulink for bank angle tracking tasks. In these simulations, the commanded stability axis bank angle is a sequence of 5-second steps. In both of the examples, which are presented in Sections \ref{subsec:siso_act_sims} and \ref{subsec:siso_delay_sims}, the anomaly occurs at $t_1^* = 30$s, and the corrective action is applied to the controller at $t_2^* = 90$s. The stages of the two anomaly response simulations are defined as follows.
+\begin{description}
+	\item[ANOM-1] Simulation of a shared control response to an anomaly which causes a plant with parametric uncertainties to abruptly undergo a change in actuator dynamics from direct gain to first-order lag
+	\item[ANOM-2] Simulation of a shared control response to an anomaly which introduces a time delay into the measurement of the state of a plant with parametric uncertainties
+\end{description}
+
+
 
 % TODO fix step response plots with x-axis label cut off
-\subsection{Actuator Fault}
-By applying the change in dynamics defined in (\ref{eqn:actuator_dynamics_symbolic}), and choosing $T_l = 0.556$, the plant dynamics in (\ref{eqn:plant_3_symbolic}) become
+\subsection{Actuator Fault}\label{subsec:siso_act_sims}
+The first anomaly considered in simulation, corresponding to the problem stated in Section \ref{subsec:siso_act_fault}, is the abrupt occurrence of an actuator fault, which is assumed to change the actuator dynamics from a direct gain (\ref{eq:siso_plant_input_nom}) to a first-order lag (\ref{eqn:actuator_dynamics_symbolic}). By applying the change in dynamics defined in (\ref{eqn:actuator_dynamics_symbolic}), and choosing $T_l = 0.556$, the plant dynamics change from (\ref{eqn:siso_plant_nominal_num}) to
 \begin{equation}
-	\dot{x}_p' = \begin{bmatrix}
+	\underbrace{\begin{bmatrix}
+			\dot{\phi} \\ \dot{p} \\ \ddot{p}
+		\end{bmatrix}}_{\dot{x}_p'} = \underbrace{\begin{bmatrix}
 		0 & \hfil 1 & \hfil 0\\ 0 & \hfil 0 & \hfil 1 \\ 0 & -1.98 & -2.90
-	\end{bmatrix} x_p' + \begin{bmatrix}
+	\end{bmatrix}}_{A_p'} \underbrace{\begin{bmatrix}
+			\phi \\ p \\ \dot{p}
+		\end{bmatrix}}_{x_p'} + \underbrace{\begin{bmatrix}
 		0 \\ 0 \\ 0.5724
-	\end{bmatrix} u
+	\end{bmatrix}}_{B_p'} u
 	\label{eqn:plant_3}
 \end{equation}
-\noindent at $t = t_{s,p}$, resulting in the open-loop transfer function
+\noindent at $t = t_1^*$, corresponding to the higher-order plant model given by (\ref{eqn:plant_3_compact}). This results in the open-loop transfer function
 \begin{equation}
-		\frac{\Phi(s)}{U(s)} = \frac{0.5724}{s^3 + 2.90s^2 + 1.98s}\\
+		\frac{\Phi(s)}{U(s)} = \frac{0.5724}{s^3 + 2.90s^2 + 1.98s}.\\
 \end{equation}
 
 Using this pilot input, we propose an adaptive controller predicated on a third-order dynamics of the open-loop plant and assume that in addition to the bank angle and roll rate, angular acceleration $\dot{p}$ is also measurable. We choose a reference model as
@@ -109,20 +142,10 @@ Using this pilot input, we propose an adaptive controller predicated on a third-
 	\underbrace{\begin{bmatrix}
 		\dot{\phi}_d \\ \dot{p}_d \\ \ddot{p}_d
 	\end{bmatrix}}_{\dot{x}_m'} = \underbrace{\begin{bmatrix}
-		0 & 1 & 0\\ 0 & 0 & 1 \\ -a_{m,1}' & -a_{m,2}' & -a_{m,3}'
+		\hfil 0 & \hfil 1 & \hfil 0\\ \hfil 0 & \hfil 0 & \hfil 1 \\ -32 & -32 & -10
 	\end{bmatrix}}_{A_m'} \underbrace{\begin{bmatrix}
 		\phi_d \\ p_d \\ \dot{p}_d
 	\end{bmatrix}}_{x_m'} + \underbrace{\begin{bmatrix}
-		0 \\ 0 \\ b_{m,3}'
-	\end{bmatrix}}_{B_m'} r - L_m' e'
-	\label{eqn:rm_3_symbolic}
-\end{equation}
-
-After detection and diagnosis of the anomaly with the shared decision-making framework, the corrective action to increase the dimension of the controller is made at $t = t_{s,c}$, and the reference model dynamics (with a pole added to the second-order reference model at $s = -4$) becomes that of (\ref{eqn:rm_3_symbolic}) given by
-\begin{equation}
-	\dot{x}_m' = \underbrace{\begin{bmatrix}
-		\hfil 0 & \hfil 1 & \hfil 0\\ \hfil 0 & \hfil 0 & \hfil 1 \\ -32 & -32 & -10
-	\end{bmatrix}}_{A_m'} x_m' + \underbrace{\begin{bmatrix}
 		0 \\ 0 \\ 32
 	\end{bmatrix}}_{B_m'} r - \underbrace{\begin{bmatrix}
 		-10 & -1 & \hfil 0 \\ \hfil 0 & -10 & -1 \\ \hfil 32 & \hfil 32 & \hfil 0
@@ -130,41 +153,53 @@ After detection and diagnosis of the anomaly with the shared decision-making fra
 	\label{eqn:rm_3}
 \end{equation}
 
-The feedback (and corresponding feedforward) gains which will cause the closed-loop roll response to match the desired response exactly are
+After detection and diagnosis of the anomaly with the shared decision-making framework, the corrective action to increase the dimension of the controller is made at $t = t_2^*$, and the reference model dynamics is switched to that of (\ref{eqn:rm_3}).
+%\begin{equation}
+%	\dot{x}_m' =  \underbrace{\begin{bmatrix}
+%		\hfil 0 & \hfil 1 & \hfil 0\\ \hfil 0 & \hfil 0 & \hfil 1 \\ -32 & -32 & -10
+%	\end{bmatrix}}_{A_m'} x_m' + \underbrace{\begin{bmatrix}
+%		0 \\ 0 \\ 32
+%	\end{bmatrix}}_{B_m'} r - \underbrace{\begin{bmatrix}
+%		-10 & -1 & \hfil 0 \\ \hfil 0 & -10 & -1 \\ \hfil 32 & \hfil 32 & \hfil 0
+%	\end{bmatrix}}_{L_m'} e'
+%	\label{eqn:rm_3}
+%\end{equation}
+%
+The control gains which will cause the closed-loop roll response to match the desired response exactly are
 \begin{align}
 	\theta^*(t) = & \begin{cases}
 		\begin{bmatrix}
 			-25.16, & -15.41
-		\end{bmatrix}  & t < t_{s,p} \\
+		\end{bmatrix}  & t < t_1^* \\
 		\begin{bmatrix}
 			-55.91, & -52.45, & -5.07
-		\end{bmatrix} & t \geq t_{s,p}
+		\end{bmatrix} & t \geq t_1^*
 	\end{cases} \\
 	q^*(t) = & \begin{cases}
-		25.16 & t < t_{s,p} \\
-		55.91 & t \geq t_{s,p}
+		25.16 & t < t_1^* \\
+		55.91 & t \geq t_1^*
 	\end{cases}
 \end{align}
-\noindent which are unknown to the adaptive controller. As mentioned earlier, we chose $\theta(t=0)= [-25.16, \quad -15.41]$ and $q(t=0)=25.16$. The learning rates in (\ref{eqn:thetadot_projection}) and (\ref{eqn:qdot_projection}) were chosen to be $\Gamma_\theta = 10 I_2$, with $I_n$ the identity matrix of dimension $n$, and $\gamma_q = 10$. The projection operator was not used in this simulation. It was assumed that $t_{s,p}=30$s and $t_{s,c}=90$s. To add more realism to the simulation example, we have assumed that the signal $\dot{p}$ is not directly measured, and instead use a high-pass filter to estimate it from $p$ using $\hat{\dot{p}} = \frac{as}{s+a} p$. Results of this simulation are given in Figures \ref{fig:command_and_output}, \ref{fig:theta}, \ref{fig:error}, and \ref{fig:step_pole}. 
+\noindent which are unknown to the adaptive controller. As mentioned earlier, we chose $\theta(t=0)= [-25.16, \quad -15.41]$ and $q(t=0)=25.16$. The learning rates in (\ref{eqn:thetadot_projection}) and (\ref{eqn:qdot_projection}) were chosen to be $\Gamma_\theta = 10 I_2$, with $I_n$ the identity matrix of dimension $n$, and $\gamma_q = 10$. The projection operator was not used in this simulation. It was assumed that $t_1^*=30$s and $t_2^*=90$s. To add more realism to the simulation example, we have assumed that the signal $\dot{p}$ is not directly measured, and instead use a high-pass filter to estimate it from $p$ using $\hat{\dot{p}} = \frac{as}{s+a} p$. Results of this simulation are given in Figures \ref{fig:command_and_output}, \ref{fig:theta}, \ref{fig:error}, and \ref{fig:step_pole}. 
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=\columnwidth]{phi_pole.pdf}
-	\caption{Command ($r$) and output ($\phi$): under nominal operation ($t \leq 30$ s), after the change in actuator dynamics ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
+	\includegraphics[width=\columnwidth]{phi_pole_v2.pdf}
+	\caption{Command ($r$) and output ($\phi$): under nominal operation ($t \leq 30$ s), after the abrupt change in actuator dynamics ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
 	\label{fig:command_and_output}
 \end{figure}
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=\columnwidth]{theta_pole.pdf}
-	\caption{Adaptive feedback gains for the same simulation example as in Figure \ref{fig:command_and_output}: under nominal operation ($t \leq 30$ s), after the change in actuator dynamics ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
+	\includegraphics[width=\columnwidth]{theta_pole_v2.pdf}
+	\caption{Adaptive feedback gains for the same simulation example as in Figure \ref{fig:command_and_output}: under nominal operation ($t \leq 30$ s), after the abrupt change in actuator dynamics ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
 	\label{fig:theta}
 \end{figure}
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=\columnwidth]{e_pole.pdf}
-	\caption{The tracking error $e$ for the same simulation example as in Figure \ref{fig:command_and_output}: under nominal operation ($t \leq 30$ s), after the change in actuator dynamics ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
+	\includegraphics[width=\columnwidth]{e_pole_v2.pdf}
+	\caption{The tracking error $e$ for the same simulation example as in Figure \ref{fig:command_and_output}: under nominal operation ($t \leq 30$ s), after the abrupt change in actuator dynamics ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
 	\label{fig:error}
 \end{figure}
 
@@ -177,50 +212,62 @@ Taking average parameter values over time $\Delta t$ at the end of each stage of
 \end{align}
 with $\Delta t = 5$s, $t_f = [30, \quad 90, \quad 180]$ allows us to define a closed-loop frequency response which is representative of controller performance after parameter adaptation in each stage. Figure \ref{fig:step_pole} shows the closed-loop unit step input responses with $(\bar{\theta}_i, \bar{q}_i)$ for $i = [1, 2, 3]$ plotted alongside the ideal response during nominal operation, demonstrating how the characteristics of nominal operation are recovered with the adaptive controller with three feedback parameters.
 
+% TODO get rid of case (i) notation, replace with something like ANOM-1, ANOM-2
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=\columnwidth]{step_pole.pdf}
-	\caption{Unit step responses for closed-loop transfer functions at different stages of simulation in case (i), demonstrating performance improvement after corrective action}
+	\includegraphics[width=\columnwidth]{step_pole_v2.pdf}
+	\caption{Unit step responses for closed-loop transfer functions at different stages of simulation in response to an actuator fault, demonstrating performance improvement after corrective action}
 	\label{fig:step_pole}
 \end{figure}
 
-\subsection{Time-Delayed Sensor Measurements}
-A time delay of $\tau = 0.200$s is added to the plant (\ref{eqn:2nd_order_lateral}) between the state measurements and their use in control input computation. The reference models given by (\ref{eqn:rm_2}) and 
+\subsection{Time-Delayed Sensor Measurements}\label{subsec:siso_delay_sims}
+The second type of anomaly considered in simulation, corresponding to the problem stated in Section \ref{subsec:siso_delay}, is the abrupt introduction of a time delay to sensor measurements. A time delay of $\tau = 0.200$s is added to the plant (\ref{eqn:2nd_order_lateral}) between the state measurements and their use in control input computation as in (\ref{eqn:delay_diffeq}), so that
 \begin{equation}
-	\dot{x}_m' = \underbrace{\begin{bmatrix}
-		\hfil 0 & \hfil 1 & \hfil 0\\ \hfil 0 & \hfil 0 & \hfil 1 \\ -32 & -32 & -10
-	\end{bmatrix}}_{A_m'} x_m' + \underbrace{\begin{bmatrix}
-		0 \\ 0 \\ 32
-	\end{bmatrix}}_{B_m'} r - \underbrace{\begin{bmatrix}
-		-10 & -1 & \hfil 0 \\ \hfil 0 & \hfil -10 & \hfil -1 \\ \hfil 32 & \hfil 32 & \hfil 9.9
-	\end{bmatrix}}_{L_m'} e'
-	\label{eqn:rm_3_delay}
+	x_\sigma(t) = x_p(t - 0.20).
 \end{equation}
-\noindent are used in the Nominal and Post-Correction intervals, respectively. With $\Phi_\sigma(s)$ defined as the delayed bank angle measurement, the change in the transfer function $\Phi_\sigma(s)/U(s)$ is thus
+With $\Phi_\sigma(s)$ defined as the delayed bank angle measurement, the change in the transfer function $\Phi_\sigma(s)/U(s)$ is thus
 \begin{equation}
 		\frac{\Phi_\sigma(s)}{U(s)} = \begin{cases}
-			\frac{0.318}{s^2 + 1.10s} & t < t_{s,p}\\
-			\frac{0.318}{s^2 + 1.10s}e^{-0.20 s} & t \geq t_{s,p}
+			\frac{0.318}{s^2 + 1.10s} & t < t_1^*\\
+			\frac{0.318}{s^2 + 1.10s}e^{-0.20 s} & t \geq t_1^*
 		\end{cases} 
 \end{equation}
 
-% TODO put this in diff eq form
-Using the first-order delay approximation (\ref{eqn:delay_approx_diffeq}), so that $e^{-0.20 s}$ is approximated as $1/(1+0.20s)$, the feedback and feedforward gains which would give the desired closed-loop response for $\Phi_\sigma(s)/U(s)$ are
+For $0 < t < t_2^*$, the reference model used by the nominal adaptive controller in simulation is that given by (\ref{eqn:rm_2}). For $t \geq t_2^*$, the reference model used by the recovery adaptive controller in simulation is given by
+\begin{equation}
+	\underbrace{\begin{bmatrix}
+		\dot{\phi}_d \\ \dot{p}_d \\ \ddot{p}_d
+	\end{bmatrix}}_{\dot{x}_m'} = \underbrace{\begin{bmatrix}
+		\hfil 0 & \hfil 1 & \hfil 0\\ \hfil 0 & \hfil 0 & \hfil 1 \\ -32 & -32 & -10
+	\end{bmatrix}}_{A_m'} \underbrace{\begin{bmatrix}
+		\phi_d \\ p_d \\ \dot{p}_d
+	\end{bmatrix}}_{x_m'} + \underbrace{\begin{bmatrix}
+		0 \\ 0 \\ 32
+	\end{bmatrix}}_{B_m'} r - \underbrace{\begin{bmatrix}
+		-10 & -1 & \hfil 0 \\ \hfil 0 & \hfil -10 & \hfil -1 \\ \hfil 32 & \hfil 32 & \hfil 9.9
+	\end{bmatrix}}_{L_m'} e'.
+	\label{eqn:rm_3_delay}
+\end{equation}
+Using the first-order delay approximation (\ref{eqn:delay_approx_diffeq}), given by
+\begin{equation}
+	0.20 \dot{x}_{\sigma}(t) + x_{\sigma}(t) = x_p(t),
+\end{equation}
+the feedback and feedforward gains which would give the desired closed-loop response for $\Phi_\sigma(s)/U(s)$ are
 \begin{align}
-	\theta^*(t) = & \begin{cases} \begin{bmatrix} -25.16, & -15.41 \end{bmatrix} & t < t_{s,p} \\ \begin{bmatrix}-20.13, & -16.67, & -2.45\end{bmatrix} & t \geq t_{s,p} \end{cases} \\
-	q^*(t) = &\begin{cases} 25.16 & t < t_{s,p} \\ 20.13 & t \geq t_{s,p} \end{cases}
+	\theta^*(t) = & \begin{cases} \begin{bmatrix} -25.16, & -15.41 \end{bmatrix} & t < t_1^* \\ \begin{bmatrix}-20.13, & -16.67, & -2.45\end{bmatrix} & t \geq t_1^* \end{cases} \\
+	q^*(t) = &\begin{cases} 25.16 & t < t_1^* \\ 20.13 & t \geq t_1^* \end{cases}
 \end{align}
 
-\noindent The learning rates chosen for this simulation were
+\noindent Parameter adaptation rates used in this simulation are given by
 \begin{align}
 	\Gamma_\theta  = & \begin{cases}
-		10 I_2 & t < t_{s,c}\\
-		\text{diag}(10.0, 10.0, 0.1) & t \geq t_{s,c}
+		10 I_2 & t < t_2^*\\
+		\text{diag}(10.0, 10.0, 0.1) & t \geq t_2^*
  	\end{cases} \\
 	\gamma_q  = &\quad 10.0 \qquad ~ \qquad ~ \qquad ~ \quad \forall t
 \end{align}
 
-\noindent where the learning rate on $\hat{\dot{p}}$ is lower than that used in the simulation of case (i). This lower learning rate was needed as the approximation of the time delay as a first-order lag is fairly restrictive. In addition, a projection operator with the following constant parameters (\ref{eqn:proj_function}) was used to limit $\dot{\theta}(t)$
+\noindent where the learning rate on $\hat{\dot{p}}$ is lower than that used in the simulation of an actuator fault, to improve robustness to the first-order approximation used to model the time delay. In addition, a projection operator with the following constant parameters (\ref{eqn:proj_function}) was used to limit $\dot{\theta}(t)$
 \begin{align}
 	\varphi_m = & \begin{bmatrix}
 		300, & 200, & 25
@@ -236,33 +283,34 @@ Using the first-order delay approximation (\ref{eqn:delay_approx_diffeq}), so th
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=\columnwidth]{phi_delay.pdf}
-	\caption{Command ($r$) and output ($\phi$): under nominal operation ($t \leq 30$ s), after the sudden addition of a time delay ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
+	\includegraphics[width=\columnwidth]{phi_delay_v2.pdf}
+	\caption{Command ($r$) and output ($\phi$): under nominal operation ($t \leq 30$ s), after the abrupt addition of a time delay ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
 	\label{fig:command_and_output_d}
 \end{figure}
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=\columnwidth]{theta_delay.pdf}
-	\caption{Adaptive feedback gains for the same simulation example as in Figure \ref{fig:command_and_output_d}: under nominal operation ($t \leq 30$ s), after the sudden addition of a time delay ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
+	\includegraphics[width=\columnwidth]{theta_delay_v2.pdf}
+	\caption{Adaptive feedback gains for the same simulation example as in Figure \ref{fig:command_and_output_d}: under nominal operation ($t \leq 30$ s), after the abrupt addition of a time delay ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
 	\label{fig:theta_d}
 \end{figure}
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=\columnwidth]{e_delay.pdf}
-	\caption{The tracking error $e$ for the same simulation example as in Figure \ref{fig:command_and_output_d}: under nominal operation ($t \leq 30$ s), after the sudden addition of a time delay ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
+	\includegraphics[width=\columnwidth]{e_delay_v2.pdf}
+	\caption{The tracking error $e$ for the same simulation example as in Figure \ref{fig:command_and_output_d}: under nominal operation ($t \leq 30$ s), after the abrupt addition of a time delay ($30$ s $< t \leq 90$ s), and after a corrective action to switch the controller ($t > 90$ s)}
 	\label{fig:error_d}
 \end{figure}
 
-The resulting responses of the shared controller are shown in Figures \ref{fig:command_and_output_d}, \ref{fig:theta_d}, and \ref{fig:error_d}. From these results, we see that the MRAC controller with two feedback parameters has trouble tracking the commanded bank angle after the introduction of an anomaly, but the addition of a third feedback parameter ($\hat{\dot{p}}$) and a corresponding increase in the dimension of the reference model allows the controller to recover a reasonable tracking performance. It is worth noting that the model-following error does not converge to zero even with the MRAC controller given by (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), (\ref{eqn:qdot_projection}), and (\ref{eqn:rm_3}), because of the time delay approximation. 
+The resulting responses of the shared controller are shown in Figures \ref{fig:command_and_output_d}, \ref{fig:theta_d}, and \ref{fig:error_d}. From these results, we see that the adaptive controller with two feedback parameters has trouble tracking the commanded bank angle after the introduction of an anomaly, but the addition of a third feedback parameter ($\hat{\dot{p}}$) and a corresponding increase in the dimension of the reference model allows the controller to recover a reasonable tracking performance. It is worth noting that the model-following error does not converge to zero even with the MRAC controller given by (\ref{eqn:control_law}), (\ref{eqn:thetadot_projection}), (\ref{eqn:qdot_projection}), and (\ref{eqn:rm_3}), because of the time delay approximation. 
 
-The transfer functions used to generate step response plots in Figure \ref{fig:step_delay} use (\ref{eqn:theta_bar}) and (\ref{eqn:q_bar}) for average parameter values. Although the step response characteristics of Post-Correction differ more from nominal operation compared to case (i), the closed-loop response of Post-Correction is significantly more satisfactory than Post-Anomaly.
+The transfer functions used to generate step response plots in Figure \ref{fig:step_delay} use (\ref{eqn:theta_bar}) and (\ref{eqn:q_bar}) for average parameter values. Although the step response characteristics of Post-Correction differ more from nominal operation compared to the case of a change in actuator dynamics, the closed-loop response of Post-Correction is significantly more satisfactory than Post-Anomaly.
 
+% TODO use ANOM-2 or something in captions
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=\columnwidth]{step_delay.pdf}
-	\caption{Unit step responses for closed-loop transfer functions at different stages of simulation in case (ii), demonstrating performance improvement after corrective action}
+	\includegraphics[width=\columnwidth]{step_delay_v2.pdf}
+	\caption{Unit step responses for closed-loop transfer functions at different stages of simulation of delayed sensor measurements, demonstrating performance improvement after corrective action}
 	\label{fig:step_delay}
 \end{figure}
 \clearpage
