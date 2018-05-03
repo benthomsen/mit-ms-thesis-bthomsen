@@ -269,4 +269,59 @@ The final task for the trained remote human operator is the transfer of this dia
 The shared control architecture between adaptive autopilots and a human operator that we propose is as follows. Before the occurrence of an anomaly, the nominal adaptive autopilot with control action defined in (\ref{eq:u_rd2}) is used to control the plant. An anomaly which abruptly changes actuator dynamics from (\ref{eq:first_order_act}) to (\ref{eq:second_order_act}) is assumed to occur at $t := t_1^*$. Following this time instant, the human operator is responsible for carrying out tasks 1--3 before the time limit at which failure would occur without action ($t:=t_3^*$). The completion of task 3 by the human ($t := t_2^*$) results in a switch to the recovery adaptive autopilot with control action as in (\ref{eq:u_rd3}). 
 
 Note that our shared control architecture does not involve a handover of regulation and command tracking tasks to the human following an anomaly. Instead, in our shared control architecture, the human operator is responsible for high-level cognition tasks while adaptive autopilots retain responsibility for low-level regulation, therefore directly leveraging and combining their complementary merits.
+
+\begin{figure}[h]
+	\centering
+	
+\begin{tikzpicture}[auto, node distance=1.5cm,>=latex'] \scriptsize
+    \node [align=center] (hp) at (0,0) {\Large Remote Human\\[2.5mm] \Large Operator};
+    \node (p1) at (3.1,0) {\Large $+$};
+    \node (ap) at (6.2,0) {\Large Autopilot};
+    
+    \node [row, below of = p1] (r1) {\Large $+$};
+    \node [row, below of = r1] (r2) {\Large $+$};
+    \node [row, below of = r2] (r3) {\Large $+$};
+    \node [row, below of = r3] (r4) {\Large $+$};
+    \node [row, below of = r4] (r5) {\Large $+$};
+    \node [row, below of = r5] (r6) {\Large $+$};
+    
+    \node [stage, left of = r1] (s1) {\scriptsize Nominal\\\scriptsize Operation};
+    \node [stage, left of = r2] (s2) {\scriptsize Information\\\scriptsize Acquisition};
+    \node [stage, left of = r3] (s3) {\scriptsize Information\\\scriptsize Analysis};
+    \node [stage, left of = r4] (s4) {\scriptsize Decision\\\scriptsize Selection};
+    \node [stage, left of = r5] (s5) {\scriptsize Action\\\scriptsize Implementation};
+    \node [stage, left of = r6] (s6) {\scriptsize Result};
+    
+	\node[star, fill=red, minimum width=0.4cm, inner sep=0pt, star points=5, star point ratio=2.25, draw] (anom) at (-5.3,-2.25) {};
+	\node [right of = anom, node distance = 1.1cm] {\footnotesize $t = t_1^*$};
+	
+	\node[star, fill=green, minimum width=0.4cm, inner sep=0pt, star points=5, star point ratio=2.25, draw] (fix) at (-5.3,-8.25) {};
+	\node [right of = fix, node distance = 1.1cm] {\footnotesize $t = t_2^*$};
+
+    \draw [arr] ($(s1)+(0,1)$) -- (s1);
+    \draw [arr] (s1) -- (s2);
+    \draw [arr] (s2) -- (s3);
+    \draw [arr] (s3) -- (s4);
+    \draw [arr] (s4) -- (s5);
+    \draw [arr] (s5) -- (s6);
+    \draw [arr] (s6) -- ($(s6)+(0,-1)$);
+        
+	\node [note, below of = hp] (hp1) {\scriptsize Monitors for changes in\\\scriptsize autopilot performance};
+	\node [note, below of = hp1] (hp2) {\scriptsize Primarily via visual sensing\\\scriptsize from displays};
+	\node [note, below of = hp2] (hp3) {\scriptsize Internal models of vehicle dynamics, \\\scriptsize perceptive and cognitive capabilities};
+	\node [note, below of = hp3] (hp4) {\scriptsize Chooses to switch autopilot to\\\scriptsize recovery mode, if appropriate};
+	\node [note, below of = hp4] (hp5) {\scriptsize Communicates decision to autopilot\\\scriptsize through interface};
+	\node [note, below of = hp5] (hp6) {\scriptsize Monitors to ensure performance \\\scriptsize improves and anomaly does not worsen};
+	
+	\node [note, below of = ap] (ap1) {\scriptsize Adaptive autopilot determines $u(t)$};
+	\node [note, below of = ap1] (ap2) {\scriptsize Via vehicle sensors};
+	\node [note, below of = ap2] (ap3) {\scriptsize Vehicle health monitoring algorithms\\\scriptsize such as innovations tests};
+	\node [note, below of = ap3] (ap4) { };	
+	\node [note, below of = ap4] (ap5) {\scriptsize Implements \textit{recovery} adaptive\\\scriptsize control algorithm};
+	\node [note, below of = ap5] (ap6) {\scriptsize Adaptive autopilot determines $u(t)$};
+\end{tikzpicture}
+
+	\caption{Proposed framework for shared decision-making and control between a remote human operator and adaptive control algorithms following an anomaly, with roles organized by stages of decision making as categorized in Ref.~\cite{parasuraman2000model}}
+	\label{fig:response_flow_remote}
+\end{figure}
 A detailed discussion of the stability of the closed-loop system with the overall shared controller is not carried out in this paper. But it is clear that if the human completes tasks 1--3 sufficiently fast (i.e., $t_2^* < t_3^*$), then the shared controller will guarantee boundedness of the closed-loop system and convergence of $e(t) = x(t) - x_m(t)$ to zero if our assumptions are satisfied. We carry out a detailed simulation study in the following chapter and evaluate the performance of the shared controller proposed above.

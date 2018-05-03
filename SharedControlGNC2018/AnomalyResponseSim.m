@@ -32,7 +32,7 @@ classdef AnomalyResponseSim < handle
             % ****** Parameters ****** 
             SP.tfin  = 180;   % simulation length (sec)
             SP.ts    = 30;    % plant dynamics switch time (anomaly)
-            SP.ts_rm = 180;    % controller switching time  (anomaly response)
+            SP.ts_rm = 90;    % controller switching time  (anomaly response)
             SP.dT    = 0.005; % fixed time step
 
             % 2D reference model dynamics
