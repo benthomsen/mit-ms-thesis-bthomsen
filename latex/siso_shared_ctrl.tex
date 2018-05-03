@@ -188,6 +188,12 @@ The shared control algorithm between the adaptive autopilot and human pilot that
     \node [stage, left of = r5] (s5) {\scriptsize Action\\\scriptsize Implementation};
     \node [stage, left of = r6] (s6) {\scriptsize Result};
     
+	\node[star, fill=red, minimum width=0.4cm, inner sep=0pt, star points=5, star point ratio=2.25, draw] (anom) at (-5.3,-2.25) {};
+	\node [right of = anom, node distance = 1.1cm] {\footnotesize $t = t_1^*$};
+	
+	\node[star, fill=green, minimum width=0.4cm, inner sep=0pt, star points=5, star point ratio=2.25, draw] (fix) at (-5.3,-8.25) {};
+	\node [right of = fix, node distance = 1.1cm] {\footnotesize $t = t_2^*$};
+
     \draw [arr] ($(s1)+(0,1)$) -- (s1);
     \draw [arr] (s1) -- (s2);
     \draw [arr] (s2) -- (s3);
@@ -197,18 +203,18 @@ The shared control algorithm between the adaptive autopilot and human pilot that
     \draw [arr] (s6) -- ($(s6)+(0,-1)$);
         
 	\node [note, below of = hp] (hp1) {\scriptsize Monitors for changes in\\\scriptsize autopilot performance};
-	\node [note, below of = hp1] (hp2) {\scriptsize Vestibular, proprioceptive, visual\\\scriptsize sensing, communication with ATC};
-	\node [note, below of = hp2] (hp3) {\scriptsize Internal models of vehicle\\\scriptsize dynamics, pattern recognition};
-	\node [note, below of = hp3] (hp4) {\scriptsize Instructs switch in controller\\\scriptsize structure};
-	\node [note, below of = hp4] (hp5) {};
+	\node [note, below of = hp1] (hp2) {\scriptsize Via vestibular, proprioceptive, \\\scriptsize visual sensing};
+	\node [note, below of = hp2] (hp3) {\scriptsize Internal models of vehicle dynamics, \\\scriptsize perceptive and cognitive capabilities};
+	\node [note, below of = hp3] (hp4) {\scriptsize Chooses to switch autopilot to\\\scriptsize recovery mode, if appropriate};
+	\node [note, below of = hp4] (hp5) {\scriptsize Communicates decision to autopilot\\\scriptsize through interface};
 	\node [note, below of = hp5] (hp6) {\scriptsize Monitors to ensure performance \\\scriptsize improves and anomaly does not worsen};
 	
-	\node [note, below of = ap] (ap1) {\scriptsize Adaptive autopilot in control};
-	\node [note, below of = ap1] (ap2) {\scriptsize Vehicle sensors};
-	\node [note, below of = ap2] (ap3) {\scriptsize Vehicle fault detection systems\\\scriptsize such as innovations testing};
+	\node [note, below of = ap] (ap1) {\scriptsize Adaptive autopilot determines $u(t)$};
+	\node [note, below of = ap1] (ap2) {\scriptsize Via vehicle sensors};
+	\node [note, below of = ap2] (ap3) {\scriptsize Vehicle health monitoring algorithms\\\scriptsize such as innovations tests};
 	\node [note, below of = ap3] (ap4) {\scriptsize Provides list of potential\\\scriptsize corrective actions};	
-	\node [note, below of = ap4] (ap5) {\scriptsize Switches controller structure\\\scriptsize and retains autonomous control};
-	\node [note, below of = ap5] (ap6) {\scriptsize Adaptive autopilot in control};
+	\node [note, below of = ap4] (ap5) {\scriptsize Implements \textit{recovery} adaptive\\\scriptsize control algorithm};
+	\node [note, below of = ap5] (ap6) {\scriptsize Adaptive autopilot determines $u(t)$};
 \end{tikzpicture}
 
 	\caption{Proposed framework for shared decision-making and control following an anomaly, with stages of decision making categorized in Ref.~\cite{parasuraman2000model}}
