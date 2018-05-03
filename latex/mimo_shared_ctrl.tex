@@ -4,6 +4,7 @@ The shared control framework we propose is designed so as to combine the merits 
 
 % TODO add LQR cost function in order to give numerical values
 % TODO get rid of quotes on nominal, recovery
+% TODO possible to make block diagram for OF/MIMO?
 \section{Adaptive Output-Feedback Control}\label{subsec:sc_adaptive}
 An autonomous controller is designed to track prescribed commands for plant outputs $z_p(t)$ in (\ref{eq:plant_dynamics}). The shared control framework involves separate adaptive control designs for the plant (\ref{eq:plant_dynamics}) in combination with actuator dynamics (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}). The control design accommodating first-order actuators is denoted the \textit{nominal} adaptive control design, and excluding exceptional failures, is the controller in use by the autopilot. The control design accommodating second-order actuators is a predefined \textit{recovery} adaptive controller, whose use case will be defined more fully in Section \ref{subsec:sc_human}. To achieve the control goals stated in Section \ref{ch:problem}, control design consists of
 \begin{enumerate}[label=(\roman*)]
@@ -226,7 +227,7 @@ where $C_T^{\delta}, C_T^{\delta \delta} \in \mathbb{R}^{m \times 2m}$ are block
 \section{Human Supervisor}\label{subsec:sc_human}
 %Notices, reacts, instructs.
 We task the remote human supervisor with the following three responsibilities for shared anomaly response.
-\begin{enumerate}[label=Task \arabic*., leftmargin=1.8cm]
+\begin{enumerate}[label=\textbf{Task \arabic*.}, leftmargin=1.8cm]
 	\item Timely detection of anomalous closed-loop dynamical behavior
 	\item Isolation and characterization of anomaly
 	\item Commanding a change from nominal autopilot (\ref{eq:rd2-b1a})--(\ref{eq:rd2-adaptation}) to recovery autopilot (\ref{eq:rd3-b1a})--(\ref{eq:rd3-adaptation-deriv})

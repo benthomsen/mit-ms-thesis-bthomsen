@@ -111,9 +111,9 @@ A closed-loop reference model, corresponding to (\ref{eqn:rm_2_symbolic}), is de
 
 The two cases of anomalies discussed in Sections \ref{subsec:siso_act_fault} and \ref{subsec:siso_delay}, of the introduction of actuator dynamics and a time delay, respectively, were simulated numerically in MATLAB/Simulink for bank angle tracking tasks. In these simulations, the commanded stability axis bank angle is a sequence of 5-second steps. In the simulations of these two types of anomalies, which are presented in Sections \ref{subsec:siso_act_sims} and \ref{subsec:siso_delay_sims}, the anomaly is assumed to occur at $t_1^* = 30$s, and the corrective action is applied to the controller at $t_2^* = 90$s. Time $t_3^*$ denotes the time when failure of the aircraft is assumed to occur, if applicable. The three anomaly response (AR) simulations to be presented are summarized as follows.
 \begin{description}
-	\item[Act-AR] Simulation of a shared control response to an anomaly which causes a plant with parametric uncertainties to abruptly undergo a change in actuator dynamics from direct gain to first-order lag
-	\item[Del-AR] Simulation of a shared control response to an anomaly which introduces a time delay into the measurement of the state of a plant with parametric uncertainties
-	\item[Del-AR-P] Simulation of a passive response to an anomaly which introduces a time delay into the measurement of the state of a plant with parametric uncertainties
+	\item[Act-AR (Shared)] Simulation of a shared control response to an anomaly which causes a plant with parametric uncertainties to abruptly undergo a change in actuator dynamics from direct gain to first-order lag
+	\item[Del-AR (Shared)] Simulation of a shared control response to an anomaly which introduces a time delay into the measurement of the state of a plant with parametric uncertainties
+	\item[Del-AR-P (Passive)] Simulation of a passive response to an anomaly which introduces a time delay into the measurement of the state of a plant with parametric uncertainties, and the nominal adaptive autopilot retains control without intervention from the remote human supervisor
 \end{description}
 
 \subsection{Actuator Fault}\label{subsec:siso_act_sims}
@@ -199,6 +199,7 @@ The control gains which will cause the closed-loop roll response to match the de
 
 From Figures \ref{fig:command_and_output}, \ref{fig:theta}, and \ref{fig:error}, it is clear that after an initial adaptation period, the adaptive controller with third-order reference model dynamics converges on the desired feedback/feedforward gains, returning the roll control to its satisfactory performance without requiring any manual control from the human pilot. The action required from the human pilot is in the detection and diagnosis of the anomaly in dynamical behavior, leading to the addition of feedback on $\hat{\dot{p}}$ as a corrective action. 
 
+% TODO better notation for "freezing" parameters
 Taking average parameter values over time $\Delta t$ at the end of each stage of simulation (Nominal, Post-Anomaly, Post-Correction)
 \begin{align}
 	\bar{\theta}_{t_i} &= \frac{1}{\Delta t} \int_{t_{f,i}-\Delta t}^{t_{f,i}} \theta(t) dt, \qquad i = [1, 2, 3] \label{eqn:theta_bar}\\
