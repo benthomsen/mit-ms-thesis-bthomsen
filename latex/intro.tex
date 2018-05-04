@@ -1,6 +1,4 @@
 \chapter{Introduction} \label{ch:introduction}
-% TODO make sure to refer to human and not specifically pilot in high level stuff
-
 \section{Background}
 Model-based feedback control techniques, which can establish measures of stability, optimality, and closed-loop dynamic characteristics explicitly in control design, are predicated on a certain level of \textit{a priori} knowledge of system dynamics. In any complex dynamical system, however, uncertainty is inevitable. Uncertainties may be present for myriad reasons including modeling errors, environmental variations, unforeseen anomalies, and external disturbances. The field of adaptive control addresses a limitation of control based on models of system dynamics, namely that parameters used to model the system may be uncertain. Model reference adaptive control \cite{narendra2012stable, lavretsky2013robust} accommodates these parametric uncertainties through online tuning of control parameters to ensure specified closed-loop dynamics are realized. Recent advances in adaptive control have included the development of closed-loop reference models (CRMs) \cite{gibson2013adaptive}, which greatly improves transient performance during online learning. Guarantees of stability and tracking convergence are obtained under a few assumptions on the underlying modeling structure. One such assumption includes knowing the order of the system \textit{a priori} for control design. This in turn is used to determine the number of adjustable parameters which in turn represent the key adaptive elements of an adaptive controller.
 
@@ -54,7 +52,6 @@ To maximize the probability of detection of an anomaly while minimizing the prob
 \end{figure}
 
 \section{Contributions}
-% TODO make sure this mentions both SISO/SF/HP, MIMO/OF/RHO
 % TODO use of "we" throughout - OK in thesis?
 
 This thesis develops and demonstrates a shared decision-making and control architecture between humans and adaptive control algorithms. This architecture is considered in the context of flight control, where system architectures often include both supervisory human operators and autonomous flight control systems. This shared control architecture is based on the use of adaptive control algorithms to manage uncertainty in dynamics, and supervisory human operators who manage a shared response to anomalous changes in the structure of plant dynamics. This thesis will demonstrate and discuss how this shared decision-making and control architecture can enable overall adaptation capabilities beyond what either a human or adaptive control algorithm alone would be able to accomplish, by leveraging the merits of both humans and adaptive control algorithms in a collaborative manner. 

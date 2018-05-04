@@ -1,11 +1,9 @@
 % Problem Statement
 \chapter{Problem Statement} \label{ch:problem}
-% TODO (finish) describing on high level the two problems
 
-This thesis considers two control problems, which will be described in Sections \ref{sec:siso_problem} and \ref{sec:mimo_problem}, and addressed in Chapters \ref{ch:siso_shared_ctrl} and \ref{ch:mimo_shared_ctrl}, respectively. In the first problem, it is assumed that the plant has a single input and single output, and the full state of the plant is measured directly. In this problem it is also assumed that the plant is an aircraft which has a pilot on-board. In the second problem, the plant is assumed to have multiple inputs and multiple outputs, while only the plant outputs are measured. In this second scenario, the plant is assumed to be an unmanned aircraft with a remote human operator.
+This thesis considers two control problems, which will be described in Sections \ref{sec:siso_problem} and \ref{sec:mimo_problem}, and addressed in Chapters \ref{ch:siso_shared_ctrl} and \ref{ch:mimo_shared_ctrl}, respectively. In the first problem, it is assumed that the plant has a single input and single output, and the full state of the plant is measured directly. In this problem it is also assumed that the plant is an aircraft which has a pilot on-board. In the second problem, the plant is assumed to have multiple inputs and multiple outputs, while only the plant outputs are measured. In this second scenario, the plant is assumed to be an unmanned aircraft with a remote human operator. This thesis posits that both of these problems may be addressed by designing shared control architectures which make use of collaboration between humans and adaptive control algorithms.
 
 \section{On-Board Human Pilot and Full-State Feedback Adaptive Control} \label{sec:siso_problem}
-% TODO bring notation in line with MIMO example
 
 We consider single-input single-output (SISO) \textit{n}th-order linear dynamical plant models of the form 
 \begin{equation}
@@ -18,7 +16,7 @@ We consider single-input single-output (SISO) \textit{n}th-order linear dynamica
 where $\alpha_i$ and $\beta$ are arbitrary coefficients. Design of the control law $u(t)$ is carried out under nominal conditions with the assumption
 \begin{equation}
 	u_p(t) \equiv u(t). \label{eq:siso_plant_input_nom}
-\end{equation} % TODO does this form need \alpha_0 == 0?
+\end{equation}
 Note that uncertainty in control effectiveness is captured by the uncertain matrix $B_p$. 
 
 In addition to an autonomous controller which generates control input $u(t)$ in (\ref{eq:siso_plant_input_nom}), a human operator (pilot) is tasked with the high-level operation of the plant (\ref{eq:siso_plant}), including monitoring to ensure safe and anomaly-free operation. Operation is thus denoted \textit{human-on-the-loop} as opposed to \textit{human-in-the-loop}, as the pilot does not directly command actuator input. The pilot's perceptive capabilities (corresponding to the pathways in Fig. \ref{fig:sheridan_adapted}) include the sensing of $y_{D} \subseteq y$, $y_{H}$, and $r$, where $y_{D}$ is a subset of vehicle sensor measurements available to the pilot through cockpit displays, $y_{H}$ is the human pilot's sensing through visual and vestibular modalities, and $r$ is the prescribed command which the plant output should track. Note that in the single output case, $y_D \equiv y$.

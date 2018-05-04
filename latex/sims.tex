@@ -1,7 +1,6 @@
 % Simulations
 \chapter{Anomaly Response Simulations}  \label{ch:numerical}
 \section{SISO State Feedback and On-Board Pilot}
-% TODO make sure notation here is consistent with earlier
 
 The shared control solution introduced in Chapter \ref{ch:siso_shared_ctrl} is applied to the problem introduced in Section \ref{sec:siso_problem}, using a simulation model of the lateral-directional dynamics of a fixed-wing aircraft and making assumptions about the perceptive capabilities and actions of an on-board human pilot. The aircraft model used in simulation is described in Section \ref{subsec:latdir_model}. The results of numerical simulations of the control of this plant and recovery from the two anomalies -- actuators whose dynamics change abruptly from a DC gain to first-order, and sensors whose measurements abruptly become time-delayed -- are presented in Sections \ref{subsec:siso_act_sims} and \ref{subsec:siso_delay_sims}, respectively.
 
@@ -272,7 +271,6 @@ The resulting responses of the shared controller are shown in Figures \ref{fig:c
 
 The transfer functions used to generate step response plots in Figure \ref{fig:step_delay} use (\ref{eqn:theta_bar}) and (\ref{eqn:q_bar}) for average parameter values. Although the step response characteristics of the system following the switch to recovery adaptive controller ($\tau = t_{\textrm{sim}}$) differ more from nominal operation compared to the case of a change in actuator dynamics (in Fig. \ref{fig:step_pole}), it is significantly more satisfactory than the closed-loop response before the correction ($\tau = t_2^*$).
 
-% TODO use ANOM-2 or something in captions
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\columnwidth]{step_delay_v2.pdf}
