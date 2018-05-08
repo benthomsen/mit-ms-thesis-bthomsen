@@ -124,7 +124,7 @@ plot(t4, y4, 'LineWidth', 1.5);
 title('Dynamic Response to Unit Step Command with Anomalous Actuators', 'interpreter', 'latex'); 
 xlabel('Time (s)')
 ylim([0, 1.2])
-h = legend('Second-Order Reference Model', 'Pre-Correction ($\tau = t_2^*$)', 'Post-Correction ($\tau = t_{sim}$)', 'Third-Order Reference Model', 'location', 'southeast'); 
+h = legend('Second-Order Reference Model', 'Pre-Correction ($\mathcal{T} = t_2^*$)', 'Post-Correction ($\mathcal{T} = t_{sim}$)', 'Third-Order Reference Model', 'location', 'southeast'); 
 set(h,'Interpreter','Latex'); legend('boxoff')
 tightfig()
 
@@ -257,6 +257,6 @@ plot(t4, y4, 'LineWidth', 1.5);
 title('Dynamic Response to Unit Step Command with Sensor Delay', 'interpreter', 'latex'); 
 xlabel('Time (s)')
 ylim([0, 1.2])
-h = legend('Second-Order Reference Model', 'Pre-Correction ($\tau = t_2^*$)', 'Post-Correction ($\tau = t_{sim}$)', 'Third-Order Reference Model', 'location', 'southeast'); 
+h = legend('Second-Order Reference Model', 'Pre-Correction ($\mathcal{T} = t_2^*$)', 'Post-Correction ($\mathcal{T} = t_{sim}$)', 'Third-Order Reference Model', 'location', 'southeast'); 
 set(h,'Interpreter','Latex'); legend('boxoff')
 tightfig()

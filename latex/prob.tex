@@ -1,15 +1,15 @@
 % Problem Statement
 \chapter{Problem Statement} \label{ch:problem}
 
-This thesis considers two control problems, which will be described in Sections \ref{sec:siso_problem} and \ref{sec:mimo_problem}, and addressed in Chapters \ref{ch:siso_shared_ctrl} and \ref{ch:mimo_shared_ctrl}, respectively. In the first problem, it is assumed that the plant has a single input and single output, and the full state of the plant is measured directly. In this problem it is also assumed that the plant is an aircraft which has a pilot on-board. In the second problem, the plant is assumed to have multiple inputs and multiple outputs, while only the plant outputs are measured. In this second scenario, the plant is assumed to be an unmanned aircraft with a remote human operator. This thesis posits that both of these problems may be addressed by designing shared control architectures which make use of collaboration between humans and adaptive control algorithms.
+This thesis considers two control problems, which will be described in Sections \ref{sec:siso_problem} and \ref{sec:mimo_problem}, and addressed in Chapters \ref{ch:siso_shared_ctrl} and \ref{ch:mimo_shared_ctrl}, respectively. In the first problem, it is assumed that the plant has a single input and single output, and that the full state of the plant is measured directly. In this problem it is also assumed that the plant is an aircraft which has a pilot on-board. In the second problem, the plant is assumed to have multiple inputs and multiple outputs, while only the plant outputs are measured. In this second problem, the plant is assumed to be an unmanned aircraft with a remote human operator. This thesis posits that both of these problems may be addressed by designing shared control architectures which make use of collaboration between humans and adaptive control algorithms.
 
-\section{On-Board Human Pilot and Full-State Feedback Adaptive Control} \label{sec:siso_problem}
+\section{On-Board Human Pilot and Full-State Feedback Adaptive Autopilot} \label{sec:siso_problem}
 
 We consider single-input single-output (SISO) \textit{n}th-order linear dynamical plant models of the form 
 \begin{equation}
 \dot x_p = A_p x_p + B_p u_p	, \qquad y_p = C_p x_p \label{eq:siso_plant}
 \end{equation} 
-\noindent where $x_p \in \mathbb{R}^{n \times 1}$ is a state vector, and $A_p \in \mathbb{R}^{n \times n}$ and $B_p \in \mathbb{R}^{n \times 1}$ are an uncertain matrix and an uncertain vector of dynamical properties, respectively, and $u_p(t)$ is a scalar input. $C_p \in \mathbb{R}^{1 \times n}$ is a known vector producing the scalar plant output, $y_p$, which we would like to follow prescribed commands $r(t)$ by providing a control action $u(t)$. For this problem, we consider the case where the vector $x_p$, consisting of the output $y_p$ and its first $n-1$ time derivatives, is measured and available for use in feedback control, and the vector $B_p$ is given by $B_p = [0, \cdots \, 0, \, \beta]^T$. We note that plants of this form have a transfer function from plant input to output given in the Laplace frequency domain by
+\noindent where $x_p(t) \in \mathbb{R}^{n \times 1}$ is the state vector, $A_p \in \mathbb{R}^{n \times n}$ and $B_p \in \mathbb{R}^{n \times 1}$ are an uncertain matrix and an uncertain vector of dynamical properties, respectively, and $u_p(t)$ is a scalar input. $C_p \in \mathbb{R}^{1 \times n}$ is a known vector producing the scalar plant output, $y_p(t)$, which we would like to follow prescribed commands $r(t)$ by providing a control action $u(t)$. For this problem, we consider the case where the vector $x_p$, consisting of the output $y_p$ and its first $n-1$ time derivatives, is measured and available for use in feedback control, and the vector $B_p$ is given by $B_p = [0, \cdots \, 0, \, \beta]^T$. We note that plants of this form have a transfer function from plant input to output given in the Laplace frequency domain by
 \begin{equation}
 \frac{Y_p(s)}{U_p(s)} = \frac{\beta}{s^n + \alpha_{n-1} s^{n-1} + \cdots + \alpha_0}	
 \end{equation}
@@ -19,7 +19,7 @@ where $\alpha_i$ and $\beta$ are arbitrary coefficients. Design of the control l
 \end{equation}
 Note that uncertainty in control effectiveness is captured by the uncertain matrix $B_p$. 
 
-In addition to an autonomous controller which generates control input $u(t)$ in (\ref{eq:siso_plant_input_nom}), a human operator (pilot) is tasked with the high-level operation of the plant (\ref{eq:siso_plant}), including monitoring to ensure safe and anomaly-free operation. Operation is thus denoted \textit{human-on-the-loop} as opposed to \textit{human-in-the-loop}, as the pilot does not directly command actuator input. The pilot's perceptive capabilities (corresponding to the pathways in Fig. \ref{fig:sheridan_adapted}) include the sensing of $y_{D} \subseteq y$, $y_{H}$, and $r$, where $y_{D}$ is a subset of vehicle sensor measurements available to the pilot through cockpit displays, $y_{H}$ is the human pilot's sensing through visual and vestibular modalities, and $r$ is the prescribed command which the plant output should track. Note that in the single output case, $y_D \equiv y$.
+In addition to an autonomous controller which generates control input $u(t)$ in (\ref{eq:siso_plant_input_nom}), a human operator (pilot) is tasked with the high-level operation of the plant (\ref{eq:siso_plant}), including monitoring to ensure safe and anomaly-free operation. Operation is denoted \textit{human-on-the-loop} as opposed to \textit{human-in-the-loop}, as the pilot does not directly command actuator input. The pilot's perceptive capabilities (corresponding to the pathways in Figure \ref{fig:sheridan_adapted}) are assumed to include the sensing of $y_{D} \subseteq y$, $y_{H}$, and $r$, where $y_{D}$ is a subset of vehicle sensor measurements available to the pilot through cockpit displays, $y_{H}$ is the human pilot's sensing through visual and vestibular modalities, and $r$ is the prescribed command which the plant output should track. Note that in the single output case, $y_D \equiv y$.
 
 %An adaptive autopilot based on model reference adaptive control (MRAC) is capable of addressing anomalies that can be represented as parametric uncertainties, but may perform poorly when an anomaly causes the order of the vehicle dynamics to change \cite{narendra2012stable, lavretsky2013robust}. A human pilot flying manually may detect such an anomaly and adapt to the anomalous dynamics, but the pilot's tracking performance may be noticeably poorer after a change in dynamics and pilot adaptation \cite{hess2015modeling, zaal2016manual}. 
 
@@ -27,12 +27,12 @@ We consider the introduction of two severe anomalies in the dynamics of the plan
 
 %The remote human supervisor has information on plant sensor measurements, state estimate, tracking performance, and health (via visual, haptic, and/or auditory interfaces). \textit{Human-in-the-loop} operation is possible via remote controls, allowing the operator to actuate the plant by manually providing $u(t)$ in (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}). The sensing and actuation by the remote human supervisor include time delays $\tau_s, \tau_a > 0$, respectively.
 
-The problem we investigate in Chapter \ref{ch:siso_shared_ctrl} is the design of $u(t)$ can be carried out using a shared decision-making and control architecture which leverages the merits of 
+The problem we investigate in Chapter \ref{ch:siso_shared_ctrl} is whether the design of $u(t)$ can be carried out using a shared decision-making and control architecture which leverages the merits of 
 \begin{enumerate}[label=(\alph*)]
 	\item autonomous control methodologies
 	\item an on-board human pilot
 \end{enumerate}
-to successfully mitigate two types of anomalous dynamics to be described presently and restore tracking performance in the presence of uncertainty. We refer to this class of anomaly response as a shared control response. The following two subsections describe two specific problems which will be addressed using this shared controller in Chapter \ref{ch:siso_shared_ctrl}.
+to successfully mitigate two types of anomalous dynamics to be described presently and restore tracking performance in the presence of uncertainty. We refer to this class of anomaly response as a shared control response. The following two subsections describe two specific anomalies which will be addressed using this shared controller in Chapter \ref{ch:siso_shared_ctrl}.
 
 \subsection{Actuator Fault} \label{subsec:siso_act_fault}
 An anomaly is introduced which changes the actuator dynamics from a direct input (\ref{eq:siso_plant_input_nom}) to a first-order lag
@@ -43,7 +43,7 @@ An anomaly is introduced which changes the actuator dynamics from a direct input
 \begin{equation}
 	\dot{x}_p' = A_p' x_p' + B_p' u	\label{eqn:plant_3_compact}
 \end{equation}
-where $u(t)$ is defined in (\ref{eqn:actuator_dynamics_symbolic}), and $x_p'$ consists of the output $y_p$ and its first $n$ time derivatives. The matrix $A_p'$ and vector $B_p'$ are then given by
+where $u(t)$ is defined in (\ref{eqn:actuator_dynamics_symbolic}), and $x_p'(t)$ consists of the output $y_p(t)$ and its first $n$ time derivatives. The matrix $A_p'$ and vector $B_p'$ are then given by
 \begin{equation}
 	A_p' = \begin{bmatrix}
 		\begin{matrix}0 \\ \vdots \end{matrix} & \Bigg[ \quad I_n \quad ~ \Bigg] \\ \alpha_0' & \begin{matrix}\cdots & \alpha_{n+1}' \end{matrix}
@@ -64,15 +64,15 @@ where $u(t)$ is defined in (\ref{eqn:actuator_dynamics_symbolic}), and $x_p'$ co
 %	\end{bmatrix}}_{B_p'} u
 %	\label{eqn:plant_3_symbolic}
 %\end{equation}
-where $I_n$ is the identity matrix of dimension $n$ and $\alpha_i', \, \beta'$ are uncertain coefficients. If the change in the order of the plant is not known to the adaptive controller, it may no longer be possible for it to stabilize the plant following such a change. The question then is if a shared decision-making architecture, with suitable action from the human pilot leading to feedback on the augmented state vector $x_p'$, can result in the recovery of closed-loop performance with anomalous actuator model (\ref{eqn:actuator_dynamics_symbolic}).
+where $I_n$ is the identity matrix of dimension $n$ and $\alpha_i', \, \beta'$ are uncertain coefficients. If the change in the order of the plant is not known to the adaptive controller, it may no longer be possible for it to stabilize the plant following such a change. The question then is if a shared decision-making architecture, with suitable action from the human pilot leading to feedback on the augmented state vector $x_p'$, can result in the recovery of closed-loop performance with anomalous actuator model (\ref{eqn:actuator_dynamics_symbolic}) and parametric uncertainties in the plant (\ref{eqn:plant_3_compact}).
 
 \subsection{Time-Delayed Sensor Measurements} \label{subsec:siso_delay}
-We consider the introduction an anomaly in the cyber-physical space consisting of the dynamical system with feedback control via adaptive control algorithms, which leads to latency in the feedback of plant state information. We model this anomaly as the addition of a time delay $\tau$ of the state measurements before the computation of the control input, causing a discrepancy between the plant state $x_p$ and the state as sensed by the controller, denoted $x_\sigma$, given by
+We consider the introduction of an anomaly which leads to latency in the measurement of plant state information. We model this anomaly as the addition of a time delay $\tau$ of the state measurements before the computation of the control input, causing a discrepancy between the current plant state $x_p(t)$ and the state as sensed by the controller, denoted $x_\sigma(t)$, given by
 \begin{equation}
 	x_\sigma(t) = x_p(t - \tau). \label{eqn:delay_diffeq}
 \end{equation}
 
-We note that the time delay $\tau$ may be approximated up to a certain frequency as a first-order filter, given in the Laplace frequency domain as
+We note that the effect of the time delay $\tau$ may be approximated as a first-order filter, given in the Laplace frequency domain as
 \begin{equation}
 	e^{-\tau s} \approx \frac{1}{1 + \tau s}.
 \end{equation}
@@ -85,7 +85,7 @@ We note that this effectively increases the order of the plant from $n$ to $n+1$
 \begin{equation}
 	\dot{x}_\sigma' = A_p' x_\sigma' + B_p' u \label{eqn:plant_3_tau}
 \end{equation}
-with $A_p'$ and $B_p'$ defined in (\ref{eqn:plant_3_symbolic}). Due to this similarity, we investigate the applicability of a shared control solution to the problem of Section \ref{subsec:siso_act_fault} to the problem of a time-delayed state measurement. The shared control architecture which we propose for these two problems is presented in Chapter \ref{ch:siso_shared_ctrl}.
+with $A_p'$ and $B_p'$ defined in (\ref{eqn:plant_3_symbolic}). Due to this similarity, we investigate the applicability of a shared control solution to the problem of Section \ref{subsec:siso_act_fault} to the problem of a time-delayed state measurement. The shared control architecture which we propose to address these two problems is presented in Chapter \ref{ch:siso_shared_ctrl}.
 
 %\begin{equation}
 %	\underbrace{\begin{bmatrix}
@@ -100,7 +100,7 @@ with $A_p'$ and $B_p'$ defined in (\ref{eqn:plant_3_symbolic}). Due to this simi
 %	\label{eqn:plant_3_tau}
 %\end{equation}
 
-\section{Remote Human Operation and Output Feedback Adaptive Control}  \label{sec:mimo_problem}
+\section{Remote Human Pilot and Output Feedback Adaptive Autopilot}  \label{sec:mimo_problem}
 Here we consider the problem of controlling linear multi-input multi-output (MIMO) plant models of the form
 \begin{equation}
 \begin{gathered}
@@ -122,18 +122,18 @@ Consider the occurrence of an anomaly which causes an abrupt change in actuator 
 \end{equation}
 where in addition to $\Theta_1$, $\Theta_2$ is an unknown parameter as well. This change in dynamics means that the the structure of the model used for control design is no longer accurate, and the autonomous controller may lose stability and command tracking ability. In particular, the challenge from the anomaly is the increase in relative degree between $u$ and $y_p$ from two to three.
 
-In addition to an autonomous controller which generates control input $u(t)$ in (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}), a human supervisor is tasked with the high-level operation of the plant (\ref{eq:plant_dynamics}), including mission and task planning (commanding its mode of operation) and monitoring to ensure safe and anomaly-free operation. In this chapter, we consider \textit{remote} human operators who cannot sense the vehicle state and dynamics directly through vestibular pathways. The human supervisor may be responsible for the supervision of multiple plant instances, as illustrated in Fig. \ref{fig:uav_supervisor} for the case of HALE VFA platforms. Operation is considered \textit{human-on-the-loop} in the same manner as the on-board human pilot considered in the problem of Chapter \ref{sec:siso_problem}. 
+In addition to an autonomous controller which generates control input $u(t)$ in (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}), a human supervisor is tasked with the high-level operation of the plant (\ref{eq:plant_dynamics}), including mission and task planning (commanding its mode of operation) and monitoring to ensure safe and anomaly-free operation. In this chapter, we consider \textit{remote} human operators who cannot sense the vehicle state and dynamics directly through vestibular pathways. The human supervisor may be responsible for the supervision of multiple plant instances, as illustrated in Figure \ref{fig:uav_supervisor} for the case of HALE VFA platforms. Operation is denoted \textit{human-on-the-loop} in the same manner as the on-board human pilot considered in the problem of Section \ref{sec:siso_problem}. 
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.95\columnwidth]{uav_supervisor.pdf}
-	\caption{Supervisory operation of a fleet of high altitude, long endurance UAVs}
+	\caption{Supervisory operation of a fleet of high altitude, long endurance UAVs by remote human operator}
 	\label{fig:uav_supervisor}
 \end{figure}
 
 It is assumed that the human supervisor has access to information on plant sensor measurements, state estimate, tracking performance, and health (via visual, haptic, and/or auditory interfaces), and is able to perceive changes in plant dynamics, such as an increased lag or decreased control effectiveness, via these interfaces.  \textit{Human-in-the-loop} operation is possible via remote controls, allowing the operator to actuate the plant by manually providing $u(t)$ in (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}). The sensing and actuation by the remote human supervisor include time delays $\tau_s, \tau_a > 0$, respectively.
 
-The problem we investigate in Chapter \ref{ch:mimo_shared_ctrl} is whether the design of $u(t)$ can be carried out using a shared decision-making and control architecture using
+The problem we investigate in Chapter \ref{ch:mimo_shared_ctrl} is whether the design of $u(t)$ can be carried out using a shared decision-making and control architecture which combines
 \begin{enumerate}[label=(\alph*)]
 	\item autonomous control methodologies
 	\item a remote human supervisor

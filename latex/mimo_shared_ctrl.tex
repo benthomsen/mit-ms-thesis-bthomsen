@@ -1,11 +1,11 @@
 % Shared Control
 \chapter{Shared Control with Remote Human Pilot and Output Feedback}  \label{ch:mimo_shared_ctrl}
-In this chapter, a shared control framework is proposed to address the problem stated in Chapter \ref{sec:mimo_problem}. Whereas the shared control framework proposed in Chapter \ref{ch:siso_shared_ctrl} was applicable to SISO plants with the full plant state measured and a human pilot on-board, the shared control framework to be presented here applies to MIMO plants where the full plant state is not measured directly, and humans operate remotely. As in Chapter \ref{ch:siso_shared_ctrl}, the shared control framework is designed so as to combine the merits of both adaptive control algorithms and humans. 
+In this chapter, a shared control framework is proposed to address the problem stated in Section \ref{sec:mimo_problem}. Whereas the shared control framework proposed in Chapter \ref{ch:siso_shared_ctrl} was applicable to SISO plants with the full plant state measured and a human pilot on-board, the shared control framework to be presented here applies to MIMO plants where the full plant state is not measured directly, and humans operate remotely. As in Chapter \ref{ch:siso_shared_ctrl}, the shared control framework is designed so as to combine the merits of both adaptive control algorithms and humans. 
 
-It is assumed that adaptive autopilots and complementary higher-level motion planning algorithms allow for continuous autonomous operation of the vehicle in the presence of parametric uncertainties $\Theta_p$, $\Lambda_p$, and $\Theta_1$ in (\ref{eq:plant_dynamics}) and (\ref{eq:first_order_act}). Remote human operators monitor the performance of the vehicles and are trained and able to remotely pilot the vehicle in case of autopilot failure. The remote piloting of the vehicles, however, is a daunting task due to communication delays and a weakened understanding of the vehicle dynamics, state, and environment, due to the remote nature of the task. Our shared anomaly response tasks the human operator with providing key inputs based on higher-level perception of the anomaly, but delegates the low-level regulation and command tracking tasks to adaptive control algorithms which make use of these inputs. In Section \ref{subsec:sc_adaptive}, we describe two adaptive autopilot designs which in combination with the human operator whose precise role is described subsequently in Section \ref{subsec:sc_human}, will solve the problem which was presented in Section \ref{sec:mimo_problem}. The overall shared control architecture is summarized in Section \ref{subsec:sc_overall}.
+It is assumed that adaptive autopilots and complementary higher-level motion planning algorithms allow for continuous autonomous operation of the vehicle in the presence of parametric uncertainties $\Theta_p$, $\Lambda_p$, and $\Theta_1$ in (\ref{eq:plant_dynamics}) and (\ref{eq:first_order_act}). Remote human operators monitor the performance of the vehicles and are trained and able to remotely pilot the vehicle in case of autopilot failure. The remote piloting of the vehicles, however, is a daunting task due to communication delays and a weakened understanding of the vehicle dynamics, state, and environment. Our shared anomaly response tasks the human operator with providing key inputs based on higher-level perception of the anomaly, but delegates the low-level regulation and command tracking tasks to adaptive control algorithms which make use of these inputs. In Section \ref{subsec:sc_adaptive}, we describe two adaptive autopilot designs which in combination with the human operator whose precise role is described in Section \ref{subsec:sc_human}, will solve the problem which was presented in Section \ref{sec:mimo_problem}. The overall shared control architecture is summarized in Section \ref{subsec:sc_overall}.
 
 % TODO possible to make block diagram for OF/MIMO?
-\section{Adaptive Output-Feedback Control}\label{subsec:sc_adaptive}
+\section{Output Feedback Adaptive Control}\label{subsec:sc_adaptive}
 In this section, an autonomous controller is designed so that plant outputs $z_p(t)$ in (\ref{eq:plant_dynamics}) will track prescribed commands $z_{cmd}(t)$. The shared control framework will make use of separate adaptive control designs for the plant (\ref{eq:plant_dynamics}) in combination with actuator dynamics (\ref{eq:first_order_act}) and (\ref{eq:second_order_act}). The control design accommodating first-order actuators is denoted the \textit{nominal} adaptive control design, and excluding exceptional failures, is the controller in use by the autopilot. The control design accommodating second-order actuators is a predefined \textit{recovery} adaptive controller, whose use case will be defined more fully in Section \ref{subsec:sc_human}. To achieve the control goals stated in Section \ref{ch:problem}, control design consists of
 \begin{enumerate}[label=(\roman*)]
 	\item baseline control design using the robust servomechanism linear quadratic regulator method (RSLQR);
@@ -17,7 +17,7 @@ Control design in each case uses an augmented linear plant formulation, where th
 	e_z^{\mathcal{I}}(t) = \int_0^{t} \big( z_p(\tau) - z_{cmd}(\tau)\big) d\tau.
 \end{equation}
 
-The augmented plant model with state vector $x = \begin{bmatrix} x_p^T & x_{act}^T & (e_z^{\mathcal{I}})^T\end{bmatrix}^T$ can written compactly as
+The augmented plant model with state vector $x = \begin{bmatrix} x_p^T & x_{act}^T & (e_z^{\mathcal{I}})^T\end{bmatrix}^T$ can be written compactly as
 \begin{equation}
 \begin{array}{c}
 \dot{x}= \left(A+B_{1}\Psi_{1}^{T}+B_{r}\Psi_{r}^{T}\right) x+B_{r}\Lambda u+B_{z}z_{cmd}\\
@@ -30,7 +30,7 @@ For adaptive control design, closed-loop reference models \cite{gibson2013adapti
 \begin{equation}
 \dot{x}_m = A_m x_m + B_z z_{cmd} + L e_y + \mathcal{F}_r(t), \quad y_m = C x_m \label{eq:crm_mimo}
 \end{equation}
-where $e_y = y - y_m$, $A_m = A - B_r K_{\textrm{LQR}}^T$ with $K_{\textrm{LQR}}\in\mathbb{R}^{n\times m}$ is a baseline feedback control gain designed for the system without uncertainty using RSLQR, as described by \cite{lavretsky2013robust}. $L$ is a Luenberger-like feedback gain, and $\mathcal{F}_r(t)$ is a function used when $r \geq 2$ to recover stability properties in the presence of uncertainty. Note that $u^*(t) = - K_{\textrm{LQR}}^T x(t)$ is the control policy which minimizes the infinite-horizon quadratic cost function
+where $e_y(t) = y(t) - y_m(t)$, $A_m = A - B_r K_{\textrm{LQR}}^T$ with $K_{\textrm{LQR}}\in\mathbb{R}^{n\times m}$ is a baseline feedback control gain designed for the system without uncertainty using RSLQR, as described by \cite{lavretsky2013robust}. $L$ is a Luenberger-like feedback gain, and $\mathcal{F}_r(t)$ is a function used for plants having $r \geq 2$ to recover stability guarantees in the presence of uncertainty. Note that $u^*(t) = - K_{\textrm{LQR}}^T x(t)$ is the control policy which minimizes the infinite-horizon quadratic cost function
 \begin{equation}
 J = \int_0^\infty \big[ x^T Q_{\textrm{LQR}} x + u^T R_{\textrm{LQR}}	u\big] dt
 \end{equation}
@@ -41,7 +41,7 @@ In what follows, we define a \textit{nominal} adaptive autopilot for the plant (
 \subsection{Nominal Adaptive Controller}
 %Relative degree two MIMO adaptive control.
 % need a11, a10, B_1^a, Cbar, S, Rinv, epsilon, L, two tuner laws, u, F
-The control design for the plant with first-order actuator dynamics will be summarized by describing the CRM residual gain matrix $L$, function $\mathcal{F}_2(t)$, control law $u(t)$, and parameter adaptation. Note that $B_2$ represents $B_r$ from (\ref{eq:augmented_plant}) for this relative degree two plant. 
+The control design for the plant with first-order actuator dynamics will be summarized by describing the CRM residual gain matrix $L$, function $\mathcal{F}_2(t)$, control law $u(t)$, and parameter adaptation. Note that $B_2$ represents $B_r$ from (\ref{eq:augmented_plant}) and $\mathcal{F}_2(t)$ represents $\mathcal{F}_r(t)$ from (\ref{eq:crm_mimo}) for this relative degree two plant. 
 
 The feedback matrix $L$ is designed as follows. We define the ``relative degree one input path''
 \begin{equation}
@@ -65,7 +65,7 @@ It is worth noting that this filtered signal can be represented in the Laplace $
 \begin{equation*}
 	\overline{E}_{sy}(s) = \frac{\alpha_1}{\alpha_1 s + \alpha_0} E_{sy}(s).
 \end{equation*}
-The function $\mathcal{F}_2(t)$ is then defined as
+The function $\mathcal{F}_2(t)$, which is used to ensure stability of the overall adaptive system, is then defined as
 \begin{equation}
 \mathcal{F}_2(t) = B_2 (\alpha_0 + \alpha_1 \frac{d}{dt})\big\{ \hat{\Psi}_m^T (t) \bar{e}_{sy}(t) \big\} \label{eq:F2}
 \end{equation}
@@ -83,7 +83,7 @@ We define a regressor vector of known signals as
 \mathcal{X}(t) = \big[ (K_{\textrm{LQR}}^T \overline{x}_m)^T,\quad x_m^T,\quad \overline{x}_m^T \big]^T.
 \end{equation}
 
-The control law, $u(t)$, which defines the input to the plant (\ref{eq:augmented_plant}), is then given by
+The control law which defines the input $u(t)$ to the plant (\ref{eq:augmented_plant}), is then given by
 \begin{equation}
 u(t) = - (\alpha_0 + \alpha_1 \frac{d}{dt}) \big \{ \hat{\Psi}_{\Lambda}^T (t) \mathcal{X}(t) \big\} \label{eq:u_rd2}	
 \end{equation}
@@ -127,8 +127,8 @@ The function $\mathcal{F}_3(t)$ utilizes several filtered output error vectors, 
 where $e_{sy}(t)$ was defined in (\ref{eq:esy}), $\hat{\phi}_1(t)$ is a vector of adaptive parameters, and coefficients $\alpha_i > 0$ are free design parameters. The equivalent frequency domain representations of these filtered signals are given by
 \begin{equation}
 \begin{gathered}
-	\overline{E}_{sy}^{[1]} = \frac{\alpha_2 s + \alpha_1}{\alpha_2 s^2 + \alpha_1 s + \alpha_0} E_{sy}, \qquad \overline{E}_{sy}^{[1]} = \frac{\alpha_2}{\alpha_2 s^2 + \alpha_1 s + \alpha_0} E_{sy} \\
-	\overline{E}_{sy}^{[1][2]} = \frac{\alpha_2 s}{\alpha_2 s^2 + \alpha_1 s + \alpha_0} \big( \hat{\phi}_1^T E_{sy}^{[1]} \big)
+	\overline{E}_{sy}^{[1]}(s) = \frac{\alpha_2 s + \alpha_1}{\alpha_2 s^2 + \alpha_1 s + \alpha_0} E_{sy}(s), \qquad \overline{E}_{sy}^{[1]}(s) = \frac{\alpha_2}{\alpha_2 s^2 + \alpha_1 s + \alpha_0} E_{sy}(s) \\
+	\overline{E}_{sy}^{[1][2]}(s) = \frac{\alpha_2 s}{\alpha_2 s^2 + \alpha_1 s + \alpha_0} \big( \hat{\phi}_1^T(s) E_{sy}^{[1]}(s) \big)
 	\end{gathered}
 \end{equation}
 We define a scaled, integrated measurement output error, 
@@ -203,9 +203,7 @@ Inputs to the second-order tuners are calculated by integrating
 \dot{\hat{\Theta}}'(t) &= -\Gamma_{\Theta} \nu e_y^T S^T
 \end{aligned} \label{eq:rd3-adaptation-start}
 \end{equation}
-where $\Gamma_{\Psi}, \Gamma_{\Theta} > 0$ are diagonal adaptation gains. 
-
-The desired matrices of adaptive parameters are outputs of the tuners
+where $\Gamma_{\Psi}, \Gamma_{\Theta} > 0$ are diagonal adaptation gains and the $(\cdot)'$ notation is used to differentiate these tuner inputs from the adaptive parameters which are the tuner outputs.  The desired matrices of adaptive parameters are outputs of the tuners
 \begin{equation}
 \begin{aligned}
 	\dot{X}_{\hat{\Psi}}(t) &= \big( A_T X_{\hat{\Psi}} + B_T (\hat{\Psi}'(t))^T \big) g(\mathcal{X}, \mu_{\mathcal{X}}) \\
@@ -238,7 +236,7 @@ Derivatives of the adaptive parameters, used in (\ref{eq:esy_rd3}), (\ref{eq:eIy
 \end{equation}
 where $C_T^{\delta}, C_T^{\delta \delta} \in \mathbb{R}^{m \times 2m}$ are block diagonal matrices with diagonals $C_{T,i}^{\delta} = \begin{bmatrix} 0,~ & 1	\end{bmatrix}$ and $C_{T,i}^{\delta\delta} = -\frac{1}{\alpha_2}\begin{bmatrix} \alpha_0,~ & \alpha_1 \end{bmatrix}$. For the plant (\ref{eq:plant_dynamics}) with second-order actuator model (\ref{eq:second_order_act}), an adaptive controller designed with reference model given by (\ref{eq:crm_mimo}), control input given by (\ref{eq:u_rd3}), and parameter adaptation given by (\ref{eq:rd3-adaptation-start})--(\ref{eq:rd3-adaptation-deriv}), asymptotic convergence of $e_y(t)$ to 0 is achieved.
 
-\section{Human Supervisor}\label{subsec:sc_human}
+\section{Remote Human Pilot}\label{subsec:sc_human}
 %Notices, reacts, instructs.
 We task the remote human supervisor with the following three responsibilities for shared anomaly response.
 \begin{enumerate}[label=\textbf{Task \arabic*.}, leftmargin=1.8cm]
@@ -321,4 +319,4 @@ Note that our shared control architecture does not involve a handover of regulat
 	\caption{Proposed framework for shared decision-making and control between a remote human operator and adaptive control algorithms following an anomaly, with roles organized by stages of decision making as categorized in Ref.~\cite{parasuraman2000model}}
 	\label{fig:response_flow_remote}
 \end{figure}
-A detailed discussion of the stability of the closed-loop system with the overall shared controller is not carried out in this paper. But it is clear that if the human completes tasks 1--3 sufficiently fast (i.e., $t_2^* < t_3^*$), then the shared controller will guarantee boundedness of the closed-loop system and convergence of $e(t) = x(t) - x_m(t)$ to zero if our assumptions are satisfied. We carry out a detailed simulation study in the following chapter and evaluate the performance of the shared controller proposed above.
+A detailed discussion of the stability of the closed-loop system with the overall shared controller is not carried out in this paper. But it is clear that if the human completes tasks 1--3 sufficiently fast (i.e., $t_2^* < t_3^*$), then the shared controller will guarantee boundedness of the closed-loop system and convergence of $e(t) = x(t) - x_m(t)$ to zero if our assumptions are satisfied. We carry out detailed numerical simulations in the following chapter and evaluate the performance of the shared controller proposed above.
