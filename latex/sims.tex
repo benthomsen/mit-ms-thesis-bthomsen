@@ -290,7 +290,7 @@ This successful shared control response to an anomaly which introduced latency i
 \clearpage
 
 \section{MIMO Output Feedback and Remote Pilot}
-The shared control solution introduced in Chapter \ref{ch:mimo_shared_ctrl} is applied to the problem introduced in Section \ref{sec:mimo_problem} on a high altitude, long endurance (HALE) very flexible aircraft (VFA) model. HALE aerial platforms, such as the solar-electric NASA/AeroVironment Helios and Facebook Aquila, have unique design considerations to satisfy goals of uninterrupted weeks- or months-long operation. To reduce power draw, HALE aircraft designs save mass by allowing wings to bend, and may be classified as very flexible aircraft (VFA). Compared to typical fixed-wing aircraft, these aircraft operate at low speed, and may use low-bandwidth actuators which must be accounted for in control design. HALE VFA platforms are likely to have significant modeling uncertainties and online variation in dynamics due to flexible effects and degradation over long-term operation. It is assumed that these vehicles are unmanned and that they require supervision from remote human operators as needed.
+The shared control solution introduced in Chapter \ref{ch:mimo_shared_ctrl} is applied to the problem introduced in Section \ref{sec:mimo_problem} on a high altitude, long endurance (HALE) flexible aircraft model. HALE aerial platforms, such as the solar-electric NASA/AeroVironment Helios and Facebook Aquila, have unique design considerations to satisfy goals of uninterrupted weeks- or months-long operation. To reduce power draw, HALE aircraft designs save mass by allowing wings to bend, and may be classified as very flexible aircraft (VFA) \cite{gibson2011modeling}. Compared to typical fixed-wing aircraft, these aircraft operate at low speed, and may use low-bandwidth actuators which must be accounted for in control design. HALE VFA platforms are likely to have significant modeling uncertainties and online variation in dynamics due to flexible effects and degradation over long-term operation. It is assumed that these vehicles are unmanned and that they require supervision from remote human operators as needed.
 
 The aircraft model used in simulation, developed in Ref.~\cite{gibson2011modeling} for longitudinal control design applications, is rendered in Figure \ref{fig:vfa} and described in Section \ref{subsec:vfa_model}. The results of numerical simulations on the control and anomaly recovery with this MIMO plant are then presented in Section \ref{subsec:sims}, comparing the shared anomaly response to alternative anomaly responses.
 
@@ -304,7 +304,7 @@ The aircraft model used in simulation, developed in Ref.~\cite{gibson2011modelin
 	\label{fig:vfa}
 \end{figure}
 
-The aircraft model represents the nonlinear longitudinal dynamics of a HALE VFA concept with three rigid lifting sections, hinged together such that the aircraft is able to bend at the joints of the three sections. The pitch mode dynamics of this nonlinear model is defined using the state vector
+The aircraft model represents the nonlinear longitudinal dynamics of a highly flexible HALE UAV concept with three rigid lifting sections, hinged together such that the aircraft is able to bend at the joints of the three sections. The pitch mode dynamics of this nonlinear model is defined using the state vector
 \begin{equation}
 x_{\text{vfa}} = \begin{bmatrix}
 ~V~\\
